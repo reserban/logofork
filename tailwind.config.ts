@@ -1,20 +1,54 @@
-import type { Config } from "tailwindcss";
-
-const config: Config = {
-  content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
+  content: ["./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+      fontFamily: {
+        sans: ["DM Sans", "sans-serif"],
+      },
+      borderRadius: {
+        ct: "2rem",
+        cts: "1.5rem",
+      },
+      colors: {
+        primary: {
+          "50": "#faffb3",
+          "100": "#f6ff66",
+          "200": "#f3ff1a",
+          "300": "#ecf500",
+          "400": "#d5e000",
+          "500": "#edff00",
+          "600": "#cad000",
+          "700": "#a5a800",
+          "800": "#818000",
+          "900": "#666600",
+        },
+        secondary: {
+          "50": "#e6e6e6",
+          "100": "#cccccc",
+          "200": "#999999",
+          "300": "#666666",
+          "400": "#000000",
+          "500": "#000000",
+        },
+      },
+      fontSize: {},
+      inset: {
+        dot: "0.2rem",
+      },
+      scale: {
+        "102": "1.02",
+      },
+      maxWidth: {
+        "2xs": "17rem",
       },
     },
   },
   plugins: [],
+  daisyui: {
+    themes: [],
+  },
 };
-export default config;

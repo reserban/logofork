@@ -8,6 +8,11 @@
   --background-end-rgb: 255, 255, 255;
 }
 
+::selection {
+  background-color: #edff00;
+  color: black;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: 255, 255, 255;
