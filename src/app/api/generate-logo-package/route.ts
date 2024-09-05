@@ -4,14 +4,6 @@ import sharp from "sharp";
 import sharpIco from "sharp-ico";
 import puppeteer from "puppeteer";
 
-// Configuration for the API
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-// Main POST function to handle logo package generation
 export async function POST(req: NextRequest) {
   try {
     // Parse form data
@@ -241,6 +233,7 @@ export async function POST(req: NextRequest) {
                         gravity: "center",
                       },
                     ])
+                    .flatten({ background: jpgBackgroundColor })
                     .jpeg({ quality: 100 })
                     .toBuffer();
 
@@ -296,7 +289,7 @@ export async function POST(req: NextRequest) {
                       width: size,
                       height: size,
                       channels: 4,
-                      background: backgroundColor,
+                      background: { r: 0, g: 0, b: 0, alpha: 0 },
                     },
                   })
                     .composite([
@@ -310,6 +303,7 @@ export async function POST(req: NextRequest) {
                         gravity: "center",
                       },
                     ])
+                    .flatten({ background: backgroundColor })
                     .png()
                     .toBuffer();
 
@@ -337,7 +331,7 @@ export async function POST(req: NextRequest) {
                         width: size,
                         height: size,
                         channels: 4,
-                        background: backgroundColor,
+                        background: { r: 0, g: 0, b: 0, alpha: 0 },
                       },
                     })
                       .composite([
@@ -351,6 +345,7 @@ export async function POST(req: NextRequest) {
                           gravity: "center",
                         },
                       ])
+                      .flatten({ background: backgroundColor })
                       .png()
                       .toBuffer();
                   })
@@ -393,6 +388,7 @@ export async function POST(req: NextRequest) {
                       gravity: "center",
                     },
                   ])
+                  .flatten({ background: backgroundColor })
                   .png()
                   .toBuffer();
 
@@ -482,7 +478,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Helper function to add files to the zip
+// Helper functions remain the same
 function addFileToZip(
   zip: AdmZip,
   rootFolderName: string,
@@ -510,7 +506,6 @@ function addFileToZip(
   zip.addFile(path, buffer);
 }
 
-// Helper function to get folder name
 const getFolderName = (
   folders: string[] | { [key: string]: string[] },
   folder: string
@@ -518,7 +513,6 @@ const getFolderName = (
   return folder;
 };
 
-// Helper function to get subfolder name
 const getSubfolderName = (
   folders: { [key: string]: string[] },
   folder: string,
@@ -527,7 +521,6 @@ const getSubfolderName = (
   return subfolder;
 };
 
-// Helper function to generate PDF from HTML content
 async function generatePdfFromHtml(htmlContent: string): Promise<Buffer> {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
@@ -541,17 +534,14 @@ async function generatePdfFromHtml(htmlContent: string): Promise<Buffer> {
   return Buffer.from(pdfBuffer);
 }
 
-// Helper function to replace colors with black in SVG content
 function replaceColorsWithBlack(svgContent: string): string {
   return replaceColors(svgContent, "black");
 }
 
-// Helper function to replace colors with white in SVG content
 function replaceColorsWithWhite(svgContent: string): string {
   return replaceColors(svgContent, "white");
 }
 
-// Helper function to replace colors in SVG content
 function replaceColors(svgContent: string, color: string): string {
   const replacements = [
     { regex: /fill="[^"]*"/g, replacement: `fill="${color}"` },
@@ -590,7 +580,6 @@ function replaceColors(svgContent: string, color: string): string {
   return modifiedContent;
 }
 
-// Helper function to combine multiple SVGs into one
 async function combineSvgs(
   files: (File | null)[],
   packageName: string
@@ -679,5 +668,3 @@ async function combineSvgs(
   await browser.close();
   return alignLogos;
 }
-
-export default POST;
