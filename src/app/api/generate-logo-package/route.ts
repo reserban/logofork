@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import AdmZip from "adm-zip";
 import sharp from "sharp";
 import sharpIco from "sharp-ico";
-import puppeteer from "puppeteer";
 
 export async function POST(req: NextRequest) {
   try {
@@ -36,31 +35,6 @@ export async function POST(req: NextRequest) {
       Vector: ["Designer", "Illustrator", "SVG", "EPS", "PDF"],
     };
 
-    // Combine SVGs into a master SVG
-    const combinedSvg = await combineSvgs(validFiles, packageName);
-    const masterFolderName = "Master";
-    const combinedSvgFileName = `${packageName}-master`;
-
-    // Add master SVG to zip based on selected extensions
-    if (selectedExtensions.includes("afdesign")) {
-      zip.addFile(
-        `${masterFolderName}/Designer/${combinedSvgFileName}.afdesign`,
-        Buffer.from(combinedSvg)
-      );
-    }
-    if (selectedExtensions.includes("ai")) {
-      zip.addFile(
-        `${masterFolderName}/Illustrator/${combinedSvgFileName}.ai`,
-        Buffer.from(combinedSvg)
-      );
-    }
-    if (selectedExtensions.includes("svg")) {
-      zip.addFile(
-        `${masterFolderName}/SVG/${combinedSvgFileName}.svg`,
-        Buffer.from(combinedSvg)
-      );
-    }
-
     // Process each valid file
     for (let index = 0; index < validFiles.length; index++) {
       const file = validFiles[index];
@@ -93,8 +67,6 @@ export async function POST(req: NextRequest) {
             }
 
             const svgBuffer = Buffer.from(svgContent);
-            const svgHtml = `<html><body>${svgContent}</body></html>`;
-            const pdfBuffer = await generatePdfFromHtml(svgHtml);
 
             // Add vector files to zip
             if (selectedExtensions.includes("svg")) {
@@ -147,19 +119,6 @@ export async function POST(req: NextRequest) {
                 `${safeFilename}-${logoType}-${modeFilename}`,
                 svgBuffer,
                 "afdesign"
-              );
-            }
-            if (selectedExtensions.includes("pdf")) {
-              addFileToZip(
-                zip,
-                rootFolderName,
-                modeFolderName,
-                folders,
-                "Vector",
-                "PDF",
-                `${safeFilename}-${logoType}-${modeFilename}`,
-                pdfBuffer,
-                "pdf"
               );
             }
 
@@ -521,19 +480,6 @@ const getSubfolderName = (
   return subfolder;
 };
 
-async function generatePdfFromHtml(htmlContent: string): Promise<Buffer> {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-  await page.setContent(htmlContent);
-  const pdfBuffer = await page.pdf({
-    format: "A4",
-    printBackground: true,
-    preferCSSPageSize: true,
-  });
-  await browser.close();
-  return Buffer.from(pdfBuffer);
-}
-
 function replaceColorsWithBlack(svgContent: string): string {
   return replaceColors(svgContent, "black");
 }
@@ -578,93 +524,4 @@ function replaceColors(svgContent: string, color: string): string {
   modifiedContent = modifiedContent.replace(/url\(#[^)]+\)/g, color);
 
   return modifiedContent;
-}
-
-async function combineSvgs(
-  files: (File | null)[],
-  packageName: string
-): Promise<string> {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-
-  let svgContent = "";
-  const validFiles = files.filter((file) => file !== null);
-  const padding = 20;
-  const rectSize = 500;
-
-  const versions = ["Color", "Black", "White"];
-  const gridWidth = 2 * (rectSize + padding) - padding;
-  const gridHeight = 2 * (rectSize + padding) - padding;
-  const totalWidth = gridWidth;
-  const totalHeight = versions.length * (gridHeight + padding) - padding;
-
-  for (let versionIndex = 0; versionIndex < versions.length; versionIndex++) {
-    const version = versions[versionIndex];
-
-    for (
-      let fileIndex = 0;
-      fileIndex < Math.min(validFiles.length, 4);
-      fileIndex++
-    ) {
-      const file = validFiles[fileIndex];
-      if (file) {
-        const svg = await file.text();
-
-        let versionedSvg = svg;
-        if (version === "Black") {
-          versionedSvg = replaceColorsWithBlack(svg);
-        } else if (version === "White") {
-          versionedSvg = replaceColorsWithWhite(svg);
-        }
-
-        const row = Math.floor(fileIndex / 2);
-        const col = fileIndex % 2;
-        const xPosition = col * (rectSize + padding);
-        const yPosition =
-          versionIndex * (gridHeight + padding) + row * (rectSize + padding);
-
-        svgContent += `
-          <g transform="translate(${xPosition}, ${yPosition})">
-            <rect width="${rectSize}" height="${rectSize}" fill="transparent" stroke="rgba(0,0,0,0.1)" stroke-width="1" />
-            <g id="logo-${versionIndex}-${fileIndex}">
-              ${versionedSvg}
-            </g>
-          </g>
-        `;
-      }
-    }
-  }
-
-  const combinedHtml = `
-    <html>
-      <body>
-        <svg xmlns="http://www.w3.org/2000/svg" width="${totalWidth}" height="${totalHeight}">
-          ${svgContent}
-        </svg>
-      </body>
-    </html>
-  `;
-
-  await page.setContent(combinedHtml);
-
-  const alignLogos = await page.evaluate(() => {
-    const logos = document.querySelectorAll('[id^="logo-"]');
-    logos.forEach((logo) => {
-      const svgElement = logo.querySelector("svg");
-      if (svgElement) {
-        const bbox = svgElement.getBBox();
-        const scale = Math.min(500 / bbox.width, 500 / bbox.height) * 0.8;
-        const translateX = (500 - bbox.width * scale) / 2 - bbox.x * scale;
-        const translateY = (500 - bbox.height * scale) / 2 - bbox.y * scale;
-        svgElement.setAttribute(
-          "transform",
-          `translate(${translateX}, ${translateY}) scale(${scale})`
-        );
-      }
-    });
-    return document.querySelector("svg")!.outerHTML;
-  });
-
-  await browser.close();
-  return alignLogos;
 }
