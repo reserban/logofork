@@ -802,7 +802,7 @@ export default function UploadForm() {
 
   return (
     <section className="max-w-5xl mx-auto px-4">
-      <span className="block sm:hidden mt-32 text-center font-semibold text-3xl">
+      <span className="block sm:hidden sm:mt-32 text-center font-semibold text-3xl -mt-20 px-8 sm:px-0">
         <ComputerDesktopIcon className="h-20 w-20 text-primary-500 mb-6 mx-auto" />
         Packer is only available{" "}
         <span className="text-primary-500">on desktop</span> at the moment.
