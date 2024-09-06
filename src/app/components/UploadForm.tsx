@@ -30,7 +30,7 @@ type Mode = "individual" | "archive";
 const INDIVIDUAL_HEIGHT = "h-44";
 const ARCHIVE_HEIGHT = "h-96";
 const IMAGE_SIZE = 230;
-const ARCHIVE_IMAGE_SIZE = 640;
+const ARCHIVE_IMAGE_SIZE = 600;
 const ARCHIVE_IMAGE_SIZE_M = 150;
 const IMAGE_OPACITY = 0.6;
 const ARCHIVE_IMAGE_OPACITY = 0.6;
@@ -805,15 +805,15 @@ export default function UploadForm() {
   };
 
   return (
-    <section className="max-w-5xl mx-auto px-4  text-center">
-      <span className=" sm:hidden sm:mt-32 text-center font-semibold text-3xl sm:px-0">
+    <section className="max-w-4xl mx-auto px-4 pt-8 sm:pt-0 text-center">
+      <span className=" sm:hidden text-center font-semibold text-3xl sm:px-0">
         <ComputerDesktopIcon className="h-20 w-20 text-primary-500 mb-4 mx-auto" />
         Packer is only<br></br> available{" "}
         <span className="text-primary-500">on desktop.</span>
       </span>
 
       <svg
-        className="absolute -mt-5 top-40 sm:top-56 sm:-left-9 left-1/2 transform -translate-x-1/2 sm:translate-x-0 -z-10 sm:h-[32rem] h-[32rem] w-full stroke-primary-500/10 [mask-image:radial-gradient(32rem_30rem_at_center,white,transparent)]"
+        className="absolute -mt-5 top-40 sm:top-52 sm:-left-5 left-1/2 transform -translate-x-1/2 sm:translate-x-0 -z-10 sm:h-[32rem] h-[32rem] w-full stroke-primary-500/10 [mask-image:radial-gradient(32rem_30rem_at_center,white,transparent)]"
         aria-hidden="true"
       >
         <defs>
@@ -841,7 +841,7 @@ export default function UploadForm() {
           className="flex flex-col items-center justify-center gap-2 no-select"
         >
           <PasteModal />
-          <h1 className="text-4xl max-w-md text-center mb-6 mt-2 align center font-bold tracking-tight text-white sm:text-6xl">
+          <h1 className="text-4xl max-w-md text-center mb-6 mt-4 align center font-bold tracking-tight text-white sm:text-6xl">
             <span>
               10 Seconds <span className="text-primary-500">Logo Package</span>
             </span>
@@ -1195,18 +1195,31 @@ export default function UploadForm() {
           )}
 
           <div
-            className={`bg-secondary-400 text-white border border-primary-500/20 text-sm px-4 py-2 rounded-tr-xl rounded-bl-xl shadow-lg transition-opacity duration-300 ease-in-out z-100 flex justify-center items-center gap-2 -mt-4`}
-            style={{
-              minHeight: "40px",
-              width: "fit-content",
-              padding: "0 16px",
-              opacity: status ? "1" : "0",
-            }}
+            className="relative w-full flex justify-center items-center"
+            style={{ minHeight: "40px" }}
           >
-            {isGenerating && (
-              <ArrowPathIcon className="h-5 w-5 animate-spin text-primary-500" />
-            )}
-            {status}
+            <AnimatePresence>
+              {status && (
+                <motion.div
+                  key="status"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.5 }}
+                  className="absolute bg-secondary-400 text-white border border-primary-500/20 text-sm px-4 py-2 -mt-4 rounded-tr-xl rounded-bl-xl shadow-lg z-100 flex justify-center items-center gap-2"
+                  style={{
+                    minHeight: "40px",
+                    width: "fit-content",
+                    padding: "0 16px",
+                  }}
+                >
+                  {isGenerating && (
+                    <ArrowPathIcon className="h-5 w-5 animate-spin text-primary-500" />
+                  )}
+                  <span>{status}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </form>
       </div>

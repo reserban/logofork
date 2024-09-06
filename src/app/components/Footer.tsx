@@ -73,7 +73,7 @@ export default function Footer() {
             fill="url(#1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84)"
           />
         </svg>
-        <div className="relative pt-20 sm:pt-12 pb-16 overflow-hidden isolate">
+        <div className="relative pt-24 sm:pt-12 pb-16 overflow-hidden isolate">
           <div className="px-6 mx-auto max-w-7xl lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-y-10 max-w-7xl mx-auto gap-x-4">
               <div className="max-w-xl bg-secondary-400 text-white lg:max-w-md sm:max-w-md lg:col-span-2 border px-8 py-6 rounded-tl-ct rounded-br-ct border-primary-500/20 duration-500 hover:-translate-y-1">
