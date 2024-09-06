@@ -2,25 +2,14 @@
 
 import UploadForm from "./components/UploadForm";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
 export default function Home() {
   return (
-    <div
-      style={{ display: "flex", flexDirection: "column", minHeight: "90vh" }}
-    >
+    <div>
       <Navbar />
-      <div
-        style={{
-          flex: 1,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ width: "100%" }}>
-          <UploadForm />
-        </div>
-      </div>
+      <UploadForm />
+      <Footer />
     </div>
   );
 }

@@ -8,12 +8,12 @@ import {
   ArrowPathRoundedSquareIcon,
   SwatchIcon,
   MapPinIcon,
-  ArrowDownTrayIcon,
   BookmarkIcon,
   ChevronRightIcon,
+  SquaresPlusIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import Privacy from "../components/Privacy";
+import Privacy from "./Privacy";
 import Image from "next/image";
 
 import { PiYoutubeLogo, PiLinkedinLogo, PiInstagramLogo } from "react-icons/pi";
@@ -49,9 +49,9 @@ export default function Footer() {
 
   return (
     <div id="footer">
-      <div className="relative isolate z-10">
+      <div className="relative isolate">
         <svg
-          className="absolute top-24 sm:top-6 sm:-left-5 left-1/2 transform -translate-x-1/2 sm:translate-x-0 -z-10 sm:h-[16rem] h-[32rem] w-full stroke-primary-500/20 [mask-image:radial-gradient(32rem_8rem_at_center,white,transparent)]"
+          className="absolute -mt-6 sm:-left-5 left-1/2 transform -translate-x-1/2 sm:translate-x-0 -z-10 sm:h-[17rem] h-[32rem] w-full stroke-primary-500/10 [mask-image:radial-gradient(32rem_40rem_at_center,white,transparent)]"
           aria-hidden="true"
         >
           <defs>
@@ -59,7 +59,7 @@ export default function Footer() {
               id="1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84"
               width={180}
               height={180}
-              x="60%"
+              x="116.3%"
               y={-1}
               patternUnits="userSpaceOnUse"
             >
@@ -73,26 +73,26 @@ export default function Footer() {
             fill="url(#1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84)"
           />
         </svg>
-        <div className="relative pt-16 sm:pt-20 pb-16 overflow-hidden isolate">
+        <div className="relative pt-20 sm:pt-12 pb-16 overflow-hidden isolate">
           <div className="px-6 mx-auto max-w-7xl lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-y-10 max-w-7xl mx-auto gap-x-4">
-              <div className="max-w-xl bg-secondary-400 text-white lg:max-w-md lg:col-span-2 border p-8 rounded-tr-ct rounded-bl-ct border-primary-500/20 duration-500 hover:-translate-y-1">
+              <div className="max-w-xl bg-secondary-400 text-white lg:max-w-md sm:max-w-md lg:col-span-2 border px-8 py-6 rounded-tl-ct rounded-br-ct border-primary-500/20 duration-500 hover:-translate-y-1">
                 <h2 className="text-3xl font-bold tracking-tight text-white sm:text-3xl ">
-                  Created With Love by The People at{" "}
-                  <Link
-                    href="https://unzet.com"
+                  Please Give us Feedback to Improve on{" "}
+                  <a
+                    href="https://discord.gg/W3ukzkXe2y"
                     target="_blank"
                     rel="noopener noreferrer"
+                    className="text-primary-500 duration-500 hover:scale-105 inline-flex items-center ml-1"
                   >
-                    <span className="text-primary-500 hover:underline">
-                      Unzet
-                    </span>
-                  </Link>
+                    Discord
+                    <ChevronRightIcon className="w-6 h-6" strokeWidth={2} />
+                  </a>
+                  <br className="hidden sm:inline" />
                 </h2>
               </div>
 
-              <div className="relative grid grid-cols-1 text-lg gap-x-0 sm:grid-cols-1 lg:pt-2 lg:col-span-3 justify-start">
-                <br className="sm:hidden"></br>
+              <div className="relative grid grid-cols-1 gap-y-8 lg:gap-y-2 -mt-1 text-lg gap-x-0 sm:grid-cols-1 lg:pt-2 lg:col-span-3 justify-start">
                 <Card
                   title="Contact"
                   links={[
@@ -128,50 +128,19 @@ export default function Footer() {
             </div>
           </div>
         </div>
-        <div className="px-8 mx-auto shadow-lg max-w-7xl sm:pb-8 pb-2">
-          <div className="grid grid-cols-1 sm:grid-cols-3 items-start gap-4 sm:py-0 -mt-8 sm:-mt-10">
-            <div className="order-3 sm:order-1 pt-0 sm:pt-6 flex items-center sm:block -mb-8">
+        <div className="px-8 mx-auto shadow-lg max-w-7xl sm:pb-8 pb-12">
+          <div className="flex flex-row items-center gap-4 sm:py-0 -mt-8 sm:-mt-8 justify-between mb-2">
+            <div className="flex items-center -mb-8">
               <button
                 className="text-md sm:text-sm leading-5 text-left text-white sm:mt-0 -ml-2 sm:ml-0 hover:scale-102 duration-500 hover:text-primary-500"
-                onClick={() => (window.location.href = "https://unzet.com")}
+                onClick={() => (window.location.href = "/")}
               >
                 Copyright &copy; {new Date().getFullYear()} Unzet
               </button>
-
-              <button
-                className="text-md sm:text-sm ml-5 sm:ml-0 text-white text-left hover:scale-102 transform duration-500 sm:hidden"
-                type="button"
-                onClick={handleOpenModal}
-              >
-                Privacy Policy
-              </button>
             </div>
-
-            <div className="order-1 sm:order-2 flex justify-start sm:justify-center pb-2 sm:pb-0 pt-10 sm:pt-6 -mt-16 sm:mt-0 invisible">
-              <Link
-                href="https://unzet.com"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Image
-                  src="/photos/unzet.svg"
-                  alt="Member of Unzet"
-                  width={280}
-                  height={40}
-                  className="sm:w-38 sm:h-4 w-56 h-8 -mt-2 sm:-mt-0 -mb-1 hover:scale-102 transform duration-500"
-                />
-              </Link>
-            </div>
-
-            <div className="order-3 flex flex-row justify-start sm:justify-end gap-4 pt-0 sm:pt-6">
+            <div className="flex items-center -mb-8">
               <button
-                className="hidden text-md sm:text-sm text-white text-left hover:scale-102 transform duration-500 hover:text-primary-500"
-                type="button"
-              >
-                Reset Consent
-              </button>
-              <button
-                className="text-md sm:text-sm text-white text-left hover:scale-102 transform duration-500 hover:text-primary-500 invisible sm:visible"
+                className="text-md sm:text-sm text-white text-left hover:scale-102 transform duration-500 hover:text-primary-500"
                 type="button"
                 onClick={handleOpenModal}
               >
@@ -244,6 +213,9 @@ const Card: React.FC<{
                 }}
                 className="flex items-center leading-6 text-white transition-transform duration-500 text-md font-regular  hover:scale-102 hover:text-primary-500"
                 {...(link.name === "9:00 to 18:00 GMT+2" && {
+                  "data-cal-namespace": "",
+                  "data-cal-link": "weunzet/30min",
+                  "data-cal-config": '{"layout":"month_view"}',
                   style: { cursor: "pointer" },
                 })}
               >
@@ -312,6 +284,7 @@ const Card: React.FC<{
                             aria-hidden="true"
                           />
                         )}
+
                         <span>{key}</span>
                       </a>
                     </li>

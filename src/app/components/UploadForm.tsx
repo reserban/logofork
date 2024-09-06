@@ -198,6 +198,10 @@ export default function UploadForm() {
     }
   }, [showPackageNameInput]);
 
+  useEffect(() => {
+    setHoveredType(null);
+  }, [mode]);
+
   const handleColorChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSelectedColor(event.target.value);
   };
@@ -451,7 +455,7 @@ export default function UploadForm() {
         className={`relative w-full ${INDIVIDUAL_HEIGHT} border-2 ${
           isSelected
             ? "bg-primary-500/20 border-solid border-primary-500 hover:scale-102 duration-500"
-            : "bg-secondary-400 border-dashed border-primary-500/40 hover:border-solid hover:border-primary-500/30 hover:bg-primary-500/10 hover:scale-102 duration-500 cursor-pointer"
+            : "bg-secondary-400/60 border-dashed border-primary-500/40 hover:border-solid hover:border-primary-500/30 hover:bg-primary-500/10 hover:scale-102 duration-500 cursor-pointer"
         } ${DROP_ZONE_CLASSES[type]} ${
           dragging === type ? "animate-drop-hover" : ""
         }`}
@@ -565,7 +569,7 @@ export default function UploadForm() {
         className={`relative w-full ${ARCHIVE_HEIGHT} border-2 ${
           isSelected
             ? "bg-primary-500/20 border-solid border-primary-500 hover:scale-102 duration-500"
-            : "bg-secondary-400 border-dashed border-primary-500/40 hover:border-solid hover-border-primary-500/30 hover:bg-primary-500/10 hover:scale-102 duration-500"
+            : "bg-secondary-400/60 border-dashed border-primary-500/40 hover:border-solid hover-border-primary-500/30 hover:bg-primary-500/10 hover:scale-102 duration-500"
         } ${
           DROP_ZONE_CLASSES["archive"]
         } transition-all duration-300 ease-in-out`}
@@ -801,42 +805,47 @@ export default function UploadForm() {
   };
 
   return (
-    <section className="max-w-5xl mx-auto px-4">
-      <span className="block sm:hidden sm:mt-32 text-center font-semibold text-3xl -mt-20 px-8 sm:px-0">
-        <ComputerDesktopIcon className="h-20 w-20 text-primary-500 mb-6 mx-auto" />
-        Packer is only available{" "}
-        <span className="text-primary-500">on desktop</span> at the moment.
+    <section className="max-w-5xl mx-auto px-4  text-center">
+      <span className=" sm:hidden sm:mt-32 text-center font-semibold text-3xl sm:px-0">
+        <ComputerDesktopIcon className="h-20 w-20 text-primary-500 mb-4 mx-auto" />
+        Packer is only<br></br> available{" "}
+        <span className="text-primary-500">on desktop.</span>
       </span>
+
+      <svg
+        className="absolute -mt-5 top-40 sm:top-56 sm:-left-9 left-1/2 transform -translate-x-1/2 sm:translate-x-0 -z-10 sm:h-[32rem] h-[32rem] w-full stroke-primary-500/10 [mask-image:radial-gradient(32rem_30rem_at_center,white,transparent)]"
+        aria-hidden="true"
+      >
+        <defs>
+          <pattern
+            id="1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84"
+            width={180}
+            height={180}
+            x="116.3%"
+            y={-1}
+            patternUnits="userSpaceOnUse"
+          >
+            <path d="M.5 200V.5H200" fill="none" />
+          </pattern>
+        </defs>
+        <rect
+          width="100%"
+          height="100%"
+          strokeWidth={0}
+          fill="url(#1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84)"
+        />
+      </svg>
       <div className="hidden sm:inline">
-        <svg
-          className="absolute top-24 sm:top-48 sm:-left-5 left-1/2 transform -translate-x-1/2 sm:translate-x-0 -z-10 sm:h-[32rem] h-[32rem] w-full stroke-primary-500/10 [mask-image:radial-gradient(44rem_80rem_at_center,white,transparent)]"
-          aria-hidden="true"
-        >
-          <defs>
-            <pattern
-              id="1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84"
-              width={180}
-              height={180}
-              x="260%"
-              y={-1}
-              patternUnits="userSpaceOnUse"
-            >
-              <path d="M.5 200V.5H200" fill="none" />
-            </pattern>
-          </defs>
-          <rect
-            width="100%"
-            height="100%"
-            strokeWidth={0}
-            fill="url(#1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84)"
-          />
-        </svg>
         <form
           onSubmit={handleSubmit}
           className="flex flex-col items-center justify-center gap-2 no-select"
         >
           <PasteModal />
-
+          <h1 className="text-4xl max-w-md text-center mb-6 mt-2 align center font-bold tracking-tight text-white sm:text-6xl">
+            <span>
+              10 Seconds <span className="text-primary-500">Logo Package</span>
+            </span>
+          </h1>
           <div className="flex justify-center">
             <fieldset
               aria-label="Project type"
