@@ -8,7 +8,9 @@ import React, {
   RefObject,
 } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { ComputerDesktopIcon } from "@heroicons/react/24/outline";
+
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronRightIcon,
   ClipboardDocumentCheckIcon,
@@ -16,6 +18,7 @@ import {
   FunnelIcon,
   ArrowUpTrayIcon,
   ChevronUpIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Radio, RadioGroup } from "@headlessui/react";
 import JSZip from "jszip";
@@ -24,12 +27,13 @@ import { HexColorPicker } from "react-colorful";
 type FileInputType = "vertical" | "horizontal" | "logomark" | "wordmark";
 type Mode = "individual" | "archive";
 
-const INDIVIDUAL_HEIGHT = "h-36";
-const ARCHIVE_HEIGHT = "h-80";
-const IMAGE_SIZE = 180;
-const ARCHIVE_IMAGE_SIZE = 500;
+const INDIVIDUAL_HEIGHT = "h-44";
+const ARCHIVE_HEIGHT = "h-96";
+const IMAGE_SIZE = 230;
+const ARCHIVE_IMAGE_SIZE = 640;
 const ARCHIVE_IMAGE_SIZE_M = 150;
 const IMAGE_OPACITY = 0.6;
+const ARCHIVE_IMAGE_OPACITY = 0.6;
 
 const DROP_ZONE_CLASSES: Record<FileInputType | "archive", string> = {
   vertical: "rounded-tl-ct rounded-br-ct",
@@ -71,6 +75,7 @@ const CustomColorPicker = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
   return (
     <div className="relative">
       <button
@@ -87,30 +92,46 @@ const CustomColorPicker = ({
         </span>
         <ChevronUpIcon className="w-4 h-4 ml-2 font-bold" strokeWidth={2} />
       </button>
-      {isOpen && (
-        <div
-          ref={popoverRef}
-          className="absolute border border-primary-500/20 z-[9999] mb-3 bg-secondary-400 rounded-tr-ct rounded-bl-ct shadow-lg p-4 -ml-4"
-          style={{
-            width: "240px",
-            bottom: "100%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            marginBottom: "10px",
-          }}
-        >
-          <h3 className="text-white font-semibold mb-2">Background Color</h3>
-          <HexColorPicker color={color} onChange={onChange} />
-          <input
-            type="text"
-            value={color}
-            onChange={(e) => onChange(e.target.value)}
-            className="mt-2 w-full px-2 py-1 text-sm text-white bg-secondary-500 border border-primary-500/30 rounded focus:outline-none focus:ring-2 focus:ring-primary-500/40"
-          />
-        </div>
-      )}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            ref={popoverRef}
+            className="absolute border border-primary-500/20 z-[9999] bg-secondary-400 rounded-tr-ct rounded-bl-ct shadow-lg p-4 -ml-32 "
+            style={{
+              width: "240px",
+              bottom: "110%",
+              left: "50%",
+              transform: "translateX(-50%)",
+              marginBottom: "10px",
+            }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <h3 className="text-white font-semibold mb-4">Background Color</h3>
+            <HexColorPicker color={color} onChange={onChange} />
+            <input
+              type="text"
+              value={color}
+              onChange={(e) => onChange(e.target.value)}
+              className="mt-4 w-full px-2 py-1 text-sm text-white bg-secondary-500 border border-primary-500/30 rounded-bl-xl rounded-tr-xl focus:outline-none focus:ring-2 focus:ring-primary-500/40"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
+};
+
+const truncateFileName = (fileName: string, maxLength: number) => {
+  if (fileName.length <= maxLength) return fileName;
+  const extension = fileName.split(".").pop();
+  if (!extension) return fileName; // Add this check
+  return `${fileName.substring(
+    0,
+    maxLength - extension.length - 8
+  )}...${extension}`;
 };
 
 export default function UploadForm() {
@@ -137,12 +158,17 @@ export default function UploadForm() {
     "ai",
     "eps",
     "afdesign",
-    "pdf",
     "png",
     "jpg",
     "webp",
     "tiff",
-    "favicon",
+    "favicons",
+    "color",
+    "black",
+    "white",
+    "formats",
+    "structure",
+    "master",
   ]);
   const [showExtensionFilter, setShowExtensionFilter] =
     useState<boolean>(false);
@@ -411,13 +437,21 @@ export default function UploadForm() {
       ? `${type}.svg`
       : files[type]?.name;
 
+    const truncatedFileName = fileName ? truncateFileName(fileName, 20) : "";
+
+    const handleClearFile = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setFiles((prevFiles) => ({ ...prevFiles, [type]: null }));
+      setStatus(`${type.charAt(0).toUpperCase() + type.slice(1)} cleared`);
+    };
+
     return (
       <div
         key={type}
-        className={`relative w-full ${INDIVIDUAL_HEIGHT} border-2 cursor-pointer ${
+        className={`relative w-full ${INDIVIDUAL_HEIGHT} border-2 ${
           isSelected
-            ? "bg-primary-500/20 border-solid border-primary-500 hover:scale-95 duration-500"
-            : "bg-secondary-400 border-dashed hover:scale-105 duration-500 border-primary-500/40 hover:border-solid hover:border-primary-500/30 hover:bg-primary-500/10"
+            ? "bg-primary-500/20 border-solid border-primary-500 hover:scale-102 duration-500"
+            : "bg-secondary-400 border-dashed border-primary-500/40 hover:border-solid hover:border-primary-500/30 hover:bg-primary-500/10 hover:scale-102 duration-500 cursor-pointer"
         } ${DROP_ZONE_CLASSES[type]} ${
           dragging === type ? "animate-drop-hover" : ""
         }`}
@@ -437,19 +471,27 @@ export default function UploadForm() {
         />
         <label
           htmlFor={`file-upload-${type}`}
-          className="block text-center cursor-pointer w-full h-full"
+          className="block text-center w-full h-full"
           onClick={(e) => e.stopPropagation()}
         >
           {isSelected ? (
-            <div className="flex flex-col justify-center items-center h-full">
+            <div className="flex flex-col justify-center items-center h-full relative">
               <ClipboardDocumentCheckIcon
                 className="h-10 w-10 text-primary-500"
                 style={{ opacity: 1 }}
               />
-              <span className="text-white text-md capitalize mt-2">
-                {type.charAt(0).toUpperCase() + type.slice(1)} selected
+              <div className="flex items-center mt-2 -mr-2">
+                <span className="text-white text-md capitalize">
+                  {type.charAt(0).toUpperCase() + type.slice(1)} selected
+                </span>
+                <XMarkIcon
+                  className="ml-1 w-4 h-4 text-white cursor-pointer hover:text-primary-500 hover:scale-105 duration-500"
+                  onClick={handleClearFile}
+                />
+              </div>
+              <span className="text-white text-xs mt-1">
+                {truncatedFileName}
               </span>
-              <span className="text-white text-xs mt-1">{fileName}</span>
             </div>
           ) : (
             <div className="flex flex-col justify-center items-center h-full">
@@ -464,7 +506,7 @@ export default function UploadForm() {
                 />
               )}
               {hoveredType === type && (
-                <div className="absolute bottom-7 flex flex-col items-center">
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <span className="text-white/60 text-lg mb-4">
                     {hoveredType?.charAt(0).toUpperCase() +
                       hoveredType?.slice(1)}
@@ -472,7 +514,7 @@ export default function UploadForm() {
                   <div className="flex gap-3">
                     <button
                       type="button"
-                      className="px-4 flex py-2 border border-primary-500/20  hover:bg-primary-500/10 rounded-tl-xl rounded-br-xl text-white"
+                      className="px-4 flex py-2 border border-primary-500/20 hover:bg-primary-500/10 rounded-tl-xl rounded-br-xl text-white"
                       onClick={(e) => {
                         e.preventDefault();
                         fileInputRefs[type].current?.click();
@@ -507,12 +549,23 @@ export default function UploadForm() {
       (file) => file !== null && file.name.includes("(archive)")
     );
 
+    const handleClearArchive = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setFiles({
+        vertical: null,
+        horizontal: null,
+        logomark: null,
+        wordmark: null,
+      });
+      setStatus("Archive cleared");
+    };
+
     return (
       <div
         className={`relative w-full ${ARCHIVE_HEIGHT} border-2 ${
           isSelected
-            ? "bg-primary-500/20 border-solid border-primary-500"
-            : "bg-secondary-400 border-dashed border-primary-500/40 hover:border-solid hover-border-primary-500/30 hover:bg-primary-500/10 hover:scale-105 duration-500"
+            ? "bg-primary-500/20 border-solid border-primary-500 hover:scale-102 duration-500"
+            : "bg-secondary-400 border-dashed border-primary-500/40 hover:border-solid hover-border-primary-500/30 hover:bg-primary-500/10 hover:scale-102 duration-500"
         } ${
           DROP_ZONE_CLASSES["archive"]
         } transition-all duration-300 ease-in-out`}
@@ -551,10 +604,16 @@ export default function UploadForm() {
                 className="h-16 w-16 text-primary-500"
                 style={{ opacity: 1 }}
               />
-              <span className="text-white text-xl capitalize mt-2">
-                Archive Selected
-              </span>
-              <div className="flex flex-wrap justify-center gap-x-2 mt-2 text-white text-sm">
+              <div className="flex items-center mt-2 -mr-3">
+                <span className="text-white text-xl capitalize cursor-default">
+                  Archive Selected
+                </span>
+                <XMarkIcon
+                  className="ml-1 w-4 h-4 text-white cursor-pointer hover:text-primary-500"
+                  onClick={handleClearArchive}
+                />
+              </div>
+              <div className="flex flex-wrap justify-center gap-x-2 mt-2 text-white text-sm cursor-default">
                 {Object.entries(files).map(
                   ([key, file]) =>
                     file &&
@@ -584,20 +643,24 @@ export default function UploadForm() {
                     : ARCHIVE_IMAGE_SIZE
                 }
                 className={`transition-opacity duration-300 ${
-                  hoveredType === "archive"
-                    ? "opacity-0"
-                    : `opacity-${IMAGE_OPACITY * 100}`
+                  hoveredType === "archive" ? "opacity-0" : ""
                 }`}
+                style={{
+                  opacity:
+                    hoveredType === "archive" ? 0 : ARCHIVE_IMAGE_OPACITY,
+                }}
               />
               <div
                 className={`absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-300 ${
                   hoveredType === "archive" ? "opacity-100" : "opacity-0"
                 }`}
               >
-                <span className="text-white/60 text-2xl mb-4">Archive</span>
+                <span className="text-white/60 text-2xl mb-4 cursor-default">
+                  Archive
+                </span>
                 <button
                   type="button"
-                  className="px-4 flex py-2 border text-xl border-primary-500/20   text-white rounded-tl-xl rounded-br-xl hover:bg-primary-500/10 transition-colors duration-300"
+                  className="px-4 flex py-2 border text-xl border-primary-500/20 text-white rounded-tl-xl rounded-br-xl hover:bg-primary-500/10 transition-colors duration-300 cursor-pointer"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -738,226 +801,409 @@ export default function UploadForm() {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col items-center justify-center gap-2 no-select"
-    >
-      {/* Render the modal */}
-      <PasteModal />
-
-      <div className="flex justify-center">
-        <fieldset
-          aria-label="Project type"
-          className="flex items-center ml-4 mb-4"
+    <section className="max-w-5xl mx-auto px-4">
+      <span className="block sm:hidden mt-32 text-center font-semibold text-3xl">
+        <ComputerDesktopIcon className="h-20 w-20 text-primary-500 mb-6 mx-auto" />
+        Packer is only available{" "}
+        <span className="text-primary-500">on desktop</span> at the moment.
+      </span>
+      <div className="hidden sm:inline">
+        <svg
+          className="absolute top-24 sm:top-48 sm:-left-5 left-1/2 transform -translate-x-1/2 sm:translate-x-0 -z-10 sm:h-[32rem] h-[32rem] w-full stroke-primary-500/10 [mask-image:radial-gradient(44rem_80rem_at_center,white,transparent)]"
+          aria-hidden="true"
         >
-          <RadioGroup
-            value={mode}
-            onChange={setMode}
-            className="bg-secondary-400 ml-8 grid grid-cols-2 gap-x-1 rounded-bl-xl rounded-tr-xl p-1.5 text-center text-sm font-semibold leading-5 ring-1 ring-inset ring-primary-500/30"
-          >
-            {MODES.map((option) => (
-              <Radio
-                key={option.value}
-                value={option.value}
-                className={({ checked }) =>
-                  checked
-                    ? "bg-primary-500 text-secondary-400 cursor-pointer rounded-bl-lg rounded-tr-lg px-2.5 py-1"
-                    : "text-white cursor-pointer hover:scale-95 duration-500 rounded-bl-lg rounded-tr-lg px-2.5 py-1 hover:bg-primary-500/10"
-                }
-              >
-                {option.label}
-              </Radio>
-            ))}
-          </RadioGroup>
-          <ArrowPathIcon
-            className="ml-4 w-5 h-5 text-white cursor-pointer hover:text-primary-500 hover:scale-105 duration-500"
-            onClick={handleRefresh}
+          <defs>
+            <pattern
+              id="1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84"
+              width={180}
+              height={180}
+              x="260%"
+              y={-1}
+              patternUnits="userSpaceOnUse"
+            >
+              <path d="M.5 200V.5H200" fill="none" />
+            </pattern>
+          </defs>
+          <rect
+            width="100%"
+            height="100%"
+            strokeWidth={0}
+            fill="url(#1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84)"
           />
-          <div className="relative">
-            <FunnelIcon
-              id="filter-icon"
-              className="ml-3 w-5 h-5 text-white cursor-pointer hover:text-primary-500 hover:scale-105 duration-500"
-              onClick={handleFilterIconClick}
-            />
-            {showExtensionFilter && (
-              <div
-                id="extension-filter"
-                className="absolute right-0 mt-5 w-40 bg-secondary-400 py-4 pl-4 px-3 rounded-tl-3xl rounded-br-3xl border-primary-500/20 shadow-lg z-10 border"
-                onClick={(e) => e.stopPropagation()}
+        </svg>
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col items-center justify-center gap-2 no-select"
+        >
+          <PasteModal />
+
+          <div className="flex justify-center">
+            <fieldset
+              aria-label="Project type"
+              className="flex items-center ml-10 mb-4"
+            >
+              <RadioGroup
+                value={mode}
+                onChange={setMode}
+                className="bg-secondary-400 ml-7 grid grid-cols-2 gap-x-1 rounded-bl-xl rounded-tr-xl p-1.5 text-center text-sm font-semibold mb-2 leading-5 ring-1 ring-inset ring-primary-500/30"
               >
-                {[
-                  "svg",
-                  "ai",
-                  "eps",
-                  "afdesign",
-                  "pdf",
-                  "png",
-                  "jpg",
-                  "webp",
-                  "tiff",
-                  "favicon",
-                ].map((ext) => (
-                  <div key={ext} className="flex items-center mb-2">
-                    <input
-                      type="checkbox"
-                      id={`checkbox-${ext}`}
-                      checked={selectedExtensions.includes(ext)}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        if (ext !== "svg") {
-                          setSelectedExtensions((prev) =>
-                            prev.includes(ext)
-                              ? prev.filter((e) => e !== ext)
-                              : [...prev, ext]
-                          );
-                        }
-                      }}
-                      className="hidden"
-                    />
-                    <label
-                      htmlFor={`checkbox-${ext}`}
-                      className="flex items-center cursor-pointer"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <span
-                        className={`w-5 h-5 inline-block mr-2 rounded border ${
-                          selectedExtensions.includes(ext)
-                            ? ext === "svg"
-                              ? "bg-primary-700 border-primary-700"
-                              : "bg-primary-500 border-primary-500"
-                            : "bg-secondary-400 border-primary-500/20"
-                        }`}
-                        style={{ borderWidth: "1px" }}
-                      >
-                        {selectedExtensions.includes(ext) && (
-                          <svg
-                            className="w-4 h-4 text-secondary-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg"
-                            style={{ margin: "auto" }}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M5 13l4 4L19 7"
-                            ></path>
-                          </svg>
-                        )}
-                      </span>
-                      <span className="text-white">{ext.toUpperCase()}</span>
-                    </label>
-                  </div>
+                {MODES.map((option) => (
+                  <Radio
+                    key={option.value}
+                    value={option.value}
+                    className={({ checked }) =>
+                      checked
+                        ? "bg-primary-500 text-secondary-400 cursor-pointer rounded-bl-lg rounded-tr-lg px-2.5 py-1"
+                        : "text-white cursor-pointer rounded-bl-lg rounded-tr-lg px-2.5 py-1 hover:text-primary-500 hover:scale-95 duration-500"
+                    }
+                  >
+                    {option.label}
+                  </Radio>
                 ))}
+              </RadioGroup>
+              <ArrowPathIcon
+                className="ml-4 w-5 h-5 -mt-2 text-white cursor-pointer hover:text-primary-500 hover:scale-105 duration-500"
+                onClick={handleRefresh}
+              />
+              <div className="relative">
+                <FunnelIcon
+                  id="filter-icon"
+                  className="ml-3 w-5 h-5 -mt-2 text-white cursor-pointer hover:text-primary-500 hover:scale-105 duration-500"
+                  onClick={handleFilterIconClick}
+                />
+                <AnimatePresence>
+                  {showExtensionFilter && (
+                    <motion.div
+                      id="extension-filter"
+                      className="absolute right-0 mt-5 w-72 bg-secondary-400 py-4 pl-4 px-3 rounded-tl-3xl rounded-br-3xl border-primary-500/20 shadow-lg z-10 border"
+                      onClick={(e) => e.stopPropagation()}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <h3 className="text-white text-lg mb-2 text-left">
+                            Formats
+                          </h3>
+                          {[
+                            "svg",
+                            "ai",
+                            "eps",
+                            "afdesign",
+                            "png",
+                            "jpg",
+                            "webp",
+                            "tiff",
+                          ].map((ext) => (
+                            <div key={ext} className="flex items-center mb-2">
+                              <input
+                                type="checkbox"
+                                id={`checkbox-${ext}`}
+                                checked={selectedExtensions.includes(ext)}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  if (ext !== "svg") {
+                                    setSelectedExtensions((prev) =>
+                                      prev.includes(ext)
+                                        ? prev.filter((e) => e !== ext)
+                                        : [...prev, ext]
+                                    );
+                                  }
+                                }}
+                                className="hidden"
+                              />
+                              <label
+                                htmlFor={`checkbox-${ext}`}
+                                className="flex items-center cursor-pointer"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <span
+                                  className={`w-5 h-5 inline-block mr-2 rounded border ${
+                                    selectedExtensions.includes(ext)
+                                      ? ext === "svg"
+                                        ? "bg-primary-700 border-primary-700"
+                                        : "bg-primary-500 border-primary-500"
+                                      : "bg-secondary-400 border-primary-500/20"
+                                  }`}
+                                  style={{ borderWidth: "1px" }}
+                                >
+                                  {selectedExtensions.includes(ext) && (
+                                    <svg
+                                      className="w-4 h-4 text-secondary-400"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      style={{ margin: "auto" }}
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M5 13l4 4L19 7"
+                                      ></path>
+                                    </svg>
+                                  )}
+                                </span>
+                                <span className="text-white">
+                                  {ext.toUpperCase()}
+                                </span>
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                        <div>
+                          <h3 className="text-white text-lg mb-2 text-left">
+                            Colors
+                          </h3>
+                          {["Color", "Black", "White"].map((color) => (
+                            <div key={color} className="flex items-center mb-2">
+                              <input
+                                type="checkbox"
+                                id={`checkbox-${color}`}
+                                checked={selectedExtensions.includes(
+                                  color.toLowerCase()
+                                )}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  if (color !== "Color") {
+                                    setSelectedExtensions((prev) =>
+                                      prev.includes(color.toLowerCase())
+                                        ? prev.filter(
+                                            (e) => e !== color.toLowerCase()
+                                          )
+                                        : [...prev, color.toLowerCase()]
+                                    );
+                                  }
+                                }}
+                                className="hidden"
+                              />
+                              <label
+                                htmlFor={`checkbox-${color}`}
+                                className="flex items-center cursor-pointer"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <span
+                                  className={`w-5 h-5 inline-block mr-2 rounded border ${
+                                    selectedExtensions.includes(
+                                      color.toLowerCase()
+                                    )
+                                      ? color === "Color"
+                                        ? "bg-primary-700 border-primary-700"
+                                        : "bg-primary-500 border-primary-500"
+                                      : "bg-secondary-400 border-primary-500/20"
+                                  }`}
+                                  style={{ borderWidth: "1px" }}
+                                >
+                                  {selectedExtensions.includes(
+                                    color.toLowerCase()
+                                  ) && (
+                                    <svg
+                                      className="w-4 h-4 text-secondary-400"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      style={{ margin: "auto" }}
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M5 13l4 4L19 7"
+                                      ></path>
+                                    </svg>
+                                  )}
+                                </span>
+                                <span className="text-white">{color}</span>
+                              </label>
+                            </div>
+                          ))}
+                          <h3 className="text-white text-lg mb-2 mt-4 text-left">
+                            Extras
+                          </h3>
+                          {["Favicons", "Master", "Formats", "Structure"].map(
+                            (extra) => (
+                              <div
+                                key={extra}
+                                className="flex items-center mb-2"
+                              >
+                                <input
+                                  type="checkbox"
+                                  id={`checkbox-${extra}`}
+                                  checked={selectedExtensions.includes(
+                                    extra.toLowerCase()
+                                  )}
+                                  onChange={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedExtensions((prev) =>
+                                      prev.includes(extra.toLowerCase())
+                                        ? prev.filter(
+                                            (e) => e !== extra.toLowerCase()
+                                          )
+                                        : [...prev, extra.toLowerCase()]
+                                    );
+                                  }}
+                                  className="hidden"
+                                />
+                                <label
+                                  htmlFor={`checkbox-${extra}`}
+                                  className="flex items-center cursor-pointer"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <span
+                                    className={`w-5 h-5 inline-block mr-2 rounded border ${
+                                      selectedExtensions.includes(
+                                        extra.toLowerCase()
+                                      )
+                                        ? "bg-primary-500 border-primary-500"
+                                        : "bg-secondary-400 border-primary-500/20"
+                                    }`}
+                                    style={{ borderWidth: "1px" }}
+                                  >
+                                    {selectedExtensions.includes(
+                                      extra.toLowerCase()
+                                    ) && (
+                                      <svg
+                                        className="w-4 h-4 text-secondary-400"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        style={{ margin: "auto" }}
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth="2"
+                                          d="M5 13l4 4L19 7"
+                                        ></path>
+                                      </svg>
+                                    )}
+                                  </span>
+                                  <span className="text-white">{extra}</span>
+                                </label>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-            )}
+            </fieldset>
           </div>
-        </fieldset>
-      </div>
 
-      <motion.div
-        key={mode}
-        initial={isFirstRender ? false : { opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="w-full"
-      >
-        {mode === "individual" && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full px-2 mt-4">
-            {(["vertical", "horizontal", "logomark", "wordmark"] as const).map(
-              renderFileInput
-            )}
-          </div>
-        )}
-
-        {mode === "archive" && (
-          <div className="w-full px-2 mt-4">{renderArchiveInput()}</div>
-        )}
-      </motion.div>
-
-      <div
-        className={`${
-          showPackageNameInput ? "opacity-100" : "opacity-0"
-        } w-full max-w-2xs mt-4 transition-opacity duration-300 ease-in-out`}
-        style={{ height: showPackageNameInput ? "auto" : "0px" }}
-      >
-        {showPackageNameInput && (
           <motion.div
+            key={mode}
             initial={isFirstRender ? false : { opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
+            className="w-full mt-1"
           >
-            <div className="flex flex-row border border-primary-500/20 rounded-tr-xl rounded-bl-xl sm:flex-row whitespace-nowrap justify-center mt-3 mb-7 gap-y-4  gap-x-2">
-              <div className="flex-grow">
-                <input
-                  type="text"
-                  id="package-name"
-                  ref={packageNameInputRef}
-                  value={packageName}
-                  onChange={handlePackageNameChange}
-                  className="w-full px-3 py-2 bg-secondary-400 rounded-bl-xl border-r border-primary-500/20  text-white focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-transparent"
-                  placeholder="Package Name"
-                />
+            {mode === "individual" && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full px-2">
+                {(
+                  ["vertical", "horizontal", "logomark", "wordmark"] as const
+                ).map(renderFileInput)}
               </div>
-              <div className="flex-shrink-0 w-full sm:w-auto">
-                <CustomColorPicker
-                  color={selectedColor}
-                  onChange={setSelectedColor}
-                />
-              </div>
-              <div className="flex-shrink-0">
-                <button
-                  type="submit"
-                  className={`w-full sm:w-auto cursor-pointer rounded-tr-xl bg-primary-500 px-2.5 py-2.5 text-sm font-bold text-secondary-400 shadow-sm hover:bg-primary-500/5 hover:border-primary-500/60 hover:text-primary-500 border-primary-500/20 border focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 duration-500 hover:scale-102 ${
-                    !showPackageNameInput ||
-                    Object.values(files).every((file) => file === null)
-                      ? "opacity-50 cursor-not-allowed"
-                      : ""
-                  }`}
-                  disabled={
-                    !showPackageNameInput ||
-                    Object.values(files).every((file) => file === null)
-                  }
-                >
-                  Generate
-                </button>
-              </div>
-            </div>
+            )}
+
+            {mode === "archive" && (
+              <div className="w-full px-2">{renderArchiveInput()}</div>
+            )}
           </motion.div>
-        )}
-      </div>
 
-      {!sampleLoaded && !showPackageNameInput && (
-        <motion.div
-          initial={isFirstRender ? false : { opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <a
-            onClick={handleTrySample}
-            className="py-2 flex mb-8 mt-1 text-sm font-semibold leading-6 text-white transition-all duration-500 transform gap-x-0.5 hover:gap-x-1 hover:scale-105 hover:text-primary-500 cursor-pointer"
+          <div
+            className={`${
+              showPackageNameInput ? "opacity-100" : "opacity-0"
+            } w-full max-w-2xs mt-4 transition-opacity duration-300 ease-in-out`}
+            style={{ height: showPackageNameInput ? "auto" : "0px" }}
           >
-            Try a Sample
-            <ChevronRightIcon className="w-4 mt-1 h-4" />
-          </a>
-        </motion.div>
-      )}
+            {showPackageNameInput && (
+              <motion.div
+                initial={isFirstRender ? false : { opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="flex flex-row border border-primary-500/20 rounded-tr-xl rounded-bl-xl sm:flex-row whitespace-nowrap justify-center mt-3 mb-7 gap-y-4 -mr-0  gap-x-2">
+                  <div className="flex-grow">
+                    <input
+                      type="text"
+                      id="package-name"
+                      ref={packageNameInputRef}
+                      value={packageName}
+                      onChange={handlePackageNameChange}
+                      className="w-full px-3 py-2 bg-secondary-400 rounded-bl-xl border-r border-primary-500/20  text-white focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-transparent"
+                      placeholder="Package Name"
+                    />
+                  </div>
+                  <div className="flex-shrink-0 w-full sm:w-auto">
+                    <CustomColorPicker
+                      color={selectedColor}
+                      onChange={setSelectedColor}
+                    />
+                  </div>
+                  <div className="flex-shrink-0">
+                    <button
+                      type="submit"
+                      className={`w-full sm:w-auto cursor-pointer rounded-tr-xl bg-primary-500 px-2.5 py-2.5 text-sm font-bold text-secondary-400 shadow-sm hover:bg-primary-500/5 hover:border-primary-500/60 hover:text-primary-500 border-primary-500/20 border focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 duration-500 hover:scale-102 ${
+                        !showPackageNameInput ||
+                        Object.values(files).every((file) => file === null)
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                      disabled={
+                        !showPackageNameInput ||
+                        Object.values(files).every((file) => file === null)
+                      }
+                    >
+                      Generate
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </div>
 
-      {status && (
-        <div
-          className={`${
-            status ? "opacity-100" : "opacity-0"
-          } absolute -bottom-10 sm:-bottom-8 left-1/2 transform -translate-x-1/2 bg-secondary-400 text-white border border-primary-500/20 text-sm px-4 py-2 rounded-tr-xl rounded-bl-xl shadow-lg transition-opacity duration-300 ease-in-out z-100 flex justify-center items-center gap-2`}
-          style={{ minHeight: "40px", width: "fit-content", padding: "0 16px" }}
-        >
-          {isGenerating && (
-            <ArrowPathIcon className="h-5 w-5 animate-spin text-primary-500" />
+          {!sampleLoaded && !showPackageNameInput && (
+            <motion.div
+              initial={isFirstRender ? false : { opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <a
+                onClick={handleTrySample}
+                className="py-2 flex mb-8 mt-1 text-sm font-semibold leading-6 text-white transition-all duration-500 transform gap-x-0.5 hover:gap-x-1 hover:scale-105 hover:text-primary-500 cursor-pointer"
+              >
+                Try a Sample
+                <ChevronRightIcon className="w-4 mt-1 h-4" />
+              </a>
+            </motion.div>
           )}
-          {status}
-        </div>
-      )}
-    </form>
+
+          {status && (
+            <div
+              className={`${
+                status ? "opacity-100" : "opacity-0"
+              } bg-secondary-400 text-white border border-primary-500/20 text-sm px-4 py-2 rounded-tr-xl rounded-bl-xl shadow-lg transition-opacity duration-300 ease-in-out z-100 flex justify-center items-center gap-2 -mt-4`}
+              style={{
+                minHeight: "40px",
+                width: "fit-content",
+                padding: "0 16px",
+              }}
+            >
+              {isGenerating && (
+                <ArrowPathIcon className="h-5 w-5 animate-spin text-primary-500" />
+              )}
+              {status}
+            </div>
+          )}
+        </form>
+      </div>
+    </section>
   );
 }

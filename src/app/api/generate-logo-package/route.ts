@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import AdmZip from "adm-zip";
 import sharp from "sharp";
 import sharpIco from "sharp-ico";
+import fs from "fs";
+import path from "path";
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,13 +18,17 @@ export async function POST(req: NextRequest) {
     );
     const backgroundColor = formData.get("backgroundColor") as string;
 
+    const selectedModes = ["Color", "Black", "White"].filter((mode) =>
+      selectedExtensions.includes(mode.toLowerCase())
+    );
+
     // Filter valid files and folders
     const validFiles = files.filter((file) => file !== null);
     const validFolders = [
-      "Vertical",
-      "Horizontal",
-      "Logomark",
-      "Wordmark",
+      "02 Vertical",
+      "01 Horizontal",
+      "04 Logomark",
+      "03 Wordmark",
     ].filter((_, index) => files[index] !== null);
 
     if (validFiles.length === 0) {
@@ -35,13 +41,27 @@ export async function POST(req: NextRequest) {
       Vector: ["Designer", "Illustrator", "SVG", "EPS", "PDF"],
     };
 
+    const gridSize = 2; // 2x2 grid
+    const logoHeight = 300;
+    const logoWidth = 500;
+    const totalHeight =
+      logoHeight *
+      selectedModes.length *
+      Math.ceil(validFiles.length / gridSize); // Adjust height based on selected modes
+    const totalWidth = logoWidth * gridSize;
+
+    let masterSvgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${totalWidth}" height="${totalHeight}" viewBox="0 0 ${totalWidth} ${totalHeight}">`;
+
     // Process each valid file
     for (let index = 0; index < validFiles.length; index++) {
       const file = validFiles[index];
       if (file) {
         const fileBuffer = Buffer.from(await file.arrayBuffer());
         const rootFolderName = getFolderName(validFolders, validFolders[index]);
-        const logoType = validFolders[index].toLowerCase();
+        const logoType = validFolders[index]
+          .replace(/^\d+\s/, "")
+          .toLowerCase()
+          .replace(/\s/g, ""); // Remove numbers and spaces
 
         const sharpInstance = sharp(fileBuffer);
         const { width, height } = await sharpInstance.metadata();
@@ -50,9 +70,9 @@ export async function POST(req: NextRequest) {
         const folders = { ...allFolders };
         const safeFilename = packageName.replace(/[^a-zA-Z0-9.-]/g, "_");
 
-        // Process each mode (Color, Black, White)
+        // Process each selected mode
         await Promise.all(
-          ["Color", "Black", "White"].map(async (mode) => {
+          selectedModes.map(async (mode, colorIndex) => {
             const isBlack = mode === "Black";
             const isWhite = mode === "White";
             const modeFolderName = mode;
@@ -121,6 +141,25 @@ export async function POST(req: NextRequest) {
                 "afdesign"
               );
             }
+
+            // Remove XML and SVG tags from the individual SVG content
+            const cleanedSvgContent = svgContent
+              .replace(/<\?xml.*?\?>/g, "") // Remove XML declaration
+              .replace(/<!DOCTYPE.*?>/g, "") // Remove DOCTYPE declaration
+              .replace(/<svg.*?>/g, "") // Remove opening SVG tag
+              .replace(/<\/svg>/g, ""); // Remove closing SVG tag
+
+            // Calculate position in the grid
+            const row = Math.floor(index / gridSize);
+            const col = index % gridSize;
+            const x = col * logoWidth + (logoWidth - width!) / 2;
+            const y =
+              (row + colorIndex * Math.ceil(validFiles.length / gridSize)) *
+                logoHeight +
+              (logoHeight - height!) / 2;
+
+            // Add cleaned SVG content to master SVG content
+            masterSvgContent += `<g transform="translate(${x}, ${y})">${cleanedSvgContent}</g>`;
 
             // Process raster images
             const rasterSizes = [250, 500, 1000, 4000];
@@ -230,7 +269,7 @@ export async function POST(req: NextRequest) {
               // Process favicon images
               if (
                 logoType === "logomark" &&
-                selectedExtensions.includes("favicon")
+                selectedExtensions.includes("favicons")
               ) {
                 const faviconSizes = [
                   { size: 192, name: "android-chrome-192x192" },
@@ -238,54 +277,31 @@ export async function POST(req: NextRequest) {
                   { size: 180, name: "apple-touch-icon" },
                 ];
 
-                const coloredSvgBuffer = fileBuffer;
-                for (const { size, name } of faviconSizes) {
-                  const padding = Math.round(size * 0.26);
-                  const logoSize = size - 2 * padding;
+                const modes = ["Color", "Black", "White"];
+                for (const mode of modes) {
+                  if (!selectedExtensions.includes(mode.toLowerCase()))
+                    continue; // Check if the mode is selected
 
-                  const pngBuffer = await sharp({
-                    create: {
-                      width: size,
-                      height: size,
-                      channels: 4,
-                      background: { r: 0, g: 0, b: 0, alpha: 0 },
-                    },
-                  })
-                    .composite([
-                      {
-                        input: await sharp(coloredSvgBuffer)
-                          .resize(logoSize, logoSize, {
-                            fit: "contain",
-                            background: { r: 0, g: 0, b: 0, alpha: 0 },
-                          })
-                          .toBuffer(),
-                        gravity: "center",
-                      },
-                    ])
-                    .flatten({ background: backgroundColor })
-                    .png()
-                    .toBuffer();
+                  let coloredSvgBuffer = fileBuffer;
+                  let faviconBackgroundColor = backgroundColor;
 
-                  addFileToZip(
-                    zip,
-                    rootFolderName,
-                    "Color",
-                    folders,
-                    "Favicon",
-                    "",
-                    name,
-                    pngBuffer,
-                    "png"
-                  );
-                }
+                  if (mode === "Black") {
+                    coloredSvgBuffer = Buffer.from(
+                      replaceColorsWithBlack(fileBuffer.toString())
+                    );
+                    faviconBackgroundColor = "#FFFFFF"; // White background for black logo
+                  } else if (mode === "White") {
+                    coloredSvgBuffer = Buffer.from(
+                      replaceColorsWithWhite(fileBuffer.toString())
+                    );
+                    faviconBackgroundColor = "#000000"; // Black background for white logo
+                  }
 
-                const icoSizes = [16, 32, 48];
-                const icoBuffers = await Promise.all(
-                  icoSizes.map(async (size) => {
+                  for (const { size, name } of faviconSizes) {
                     const padding = Math.round(size * 0.26);
                     const logoSize = size - 2 * padding;
 
-                    return await sharp({
+                    const pngBuffer = await sharp({
                       create: {
                         width: size,
                         height: size,
@@ -304,76 +320,117 @@ export async function POST(req: NextRequest) {
                           gravity: "center",
                         },
                       ])
-                      .flatten({ background: backgroundColor })
+                      .flatten({ background: faviconBackgroundColor })
                       .png()
                       .toBuffer();
-                  })
-                );
 
-                const icoBuffer = await sharpIco.encode(icoBuffers);
+                    addFileToZip(
+                      zip,
+                      rootFolderName,
+                      mode,
+                      folders,
+                      "Favicon",
+                      "",
+                      name,
+                      pngBuffer,
+                      "png"
+                    );
+                  }
+                  const icoSizes = [16, 32, 48];
+                  const icoBuffers = await Promise.all(
+                    icoSizes.map(async (size) => {
+                      const padding = Math.round(size * 0.26);
+                      const logoSize = size - 2 * padding;
 
-                addFileToZip(
-                  zip,
-                  rootFolderName,
-                  "Color",
-                  folders,
-                  "Favicon",
-                  "",
-                  "favicon",
-                  icoBuffer,
-                  "ico"
-                );
-
-                const mstileSize = 150;
-                const mstilePadding = Math.round(mstileSize * 0.26);
-                const mstileLogoSize = mstileSize - 2 * mstilePadding;
-
-                const mstileBuffer = await sharp({
-                  create: {
-                    width: mstileSize,
-                    height: mstileSize,
-                    channels: 4,
-                    background: { r: 0, g: 0, b: 0, alpha: 0 },
-                  },
-                })
-                  .composite([
-                    {
-                      input: await sharp(coloredSvgBuffer)
-                        .resize(mstileLogoSize, mstileLogoSize, {
-                          fit: "contain",
+                      return await sharp({
+                        create: {
+                          width: size,
+                          height: size,
+                          channels: 4,
                           background: { r: 0, g: 0, b: 0, alpha: 0 },
-                        })
-                        .toBuffer(),
-                      gravity: "center",
+                        },
+                      })
+                        .composite([
+                          {
+                            input: await sharp(coloredSvgBuffer)
+                              .resize(logoSize, logoSize, {
+                                fit: "contain",
+                                background: { r: 0, g: 0, b: 0, alpha: 0 },
+                              })
+                              .toBuffer(),
+                            gravity: "center",
+                          },
+                        ])
+                        .flatten({ background: faviconBackgroundColor })
+                        .png()
+                        .toBuffer();
+                    })
+                  );
+                  const icoBuffer = await sharpIco.encode(icoBuffers);
+
+                  addFileToZip(
+                    zip,
+                    rootFolderName,
+                    mode,
+                    folders,
+                    "Favicon",
+                    "",
+                    "favicon",
+                    icoBuffer,
+                    "ico"
+                  );
+
+                  const mstileSize = 150;
+                  const mstilePadding = Math.round(mstileSize * 0.26);
+                  const mstileLogoSize = mstileSize - 2 * mstilePadding;
+
+                  const mstileBuffer = await sharp({
+                    create: {
+                      width: mstileSize,
+                      height: mstileSize,
+                      channels: 4,
+                      background: { r: 0, g: 0, b: 0, alpha: 0 },
                     },
-                  ])
-                  .flatten({ background: backgroundColor })
-                  .png()
-                  .toBuffer();
+                  })
+                    .composite([
+                      {
+                        input: await sharp(coloredSvgBuffer)
+                          .resize(mstileLogoSize, mstileLogoSize, {
+                            fit: "contain",
+                            background: { r: 0, g: 0, b: 0, alpha: 0 },
+                          })
+                          .toBuffer(),
+                        gravity: "center",
+                      },
+                    ])
+                    .flatten({ background: faviconBackgroundColor })
+                    .png()
+                    .toBuffer();
 
-                addFileToZip(
-                  zip,
-                  rootFolderName,
-                  "Color",
-                  folders,
-                  "Favicon",
-                  "",
-                  "mstile-150x150",
-                  mstileBuffer,
-                  "png"
-                );
+                  addFileToZip(
+                    zip,
+                    rootFolderName,
+                    mode,
+                    folders,
+                    "Favicon",
+                    "",
+                    "mstile-150x150",
+                    mstileBuffer,
+                    "png"
+                  );
 
-                addFileToZip(
-                  zip,
-                  rootFolderName,
-                  "Color",
-                  folders,
-                  "Favicon",
-                  "",
-                  "safari-pinned-tab",
-                  coloredSvgBuffer,
-                  "svg"
-                );
+                  addFileToZip(
+                    zip,
+                    rootFolderName,
+                    mode,
+                    folders,
+                    "Favicon",
+                    "",
+                    "safari-pinned-tab",
+                    coloredSvgBuffer,
+                    "svg"
+                  );
+                }
               }
 
               // Process WEBP images
@@ -418,6 +475,71 @@ export async function POST(req: NextRequest) {
           })
         );
       }
+    }
+
+    masterSvgContent += `</svg>`;
+    const masterSvgBuffer = Buffer.from(masterSvgContent);
+
+    if (selectedExtensions.includes("master")) {
+      zip.addFile(
+        `05 Master/SVG/${packageName.replace(
+          /[^a-zA-Z0-9.-]/g,
+          "_"
+        )}-master.svg`,
+        masterSvgBuffer
+      );
+
+      // Convert master SVG to EPS, AFDesign, and AI formats
+      if (selectedExtensions.includes("eps")) {
+        zip.addFile(
+          `05 Master/EPS/${packageName.replace(
+            /[^a-zA-Z0-9.-]/g,
+            "_"
+          )}-master.eps`,
+          masterSvgBuffer
+        );
+      }
+      if (selectedExtensions.includes("afdesign")) {
+        zip.addFile(
+          `05 Master/Designer/${packageName.replace(
+            /[^a-zA-Z0-9.-]/g,
+            "_"
+          )}-master.afdesign`,
+          masterSvgBuffer
+        );
+      }
+      if (selectedExtensions.includes("ai")) {
+        zip.addFile(
+          `05 Master/Illustrator/${packageName.replace(
+            /[^a-zA-Z0-9.-]/g,
+            "_"
+          )}-master.ai`,
+          masterSvgBuffer
+        );
+      }
+    }
+
+    // Add Structure.pdf and Formats.pdf to the zip
+    if (selectedExtensions.includes("structure")) {
+      const structurePdfPath = path.join(
+        process.cwd(),
+        "public",
+        "documents",
+        "Structure.pdf"
+      );
+      const structurePdfBuffer = fs.readFileSync(structurePdfPath);
+      zip.addFile("Structure.pdf", structurePdfBuffer);
+    }
+
+    if (selectedExtensions.includes("formats")) {
+      const formatsPdfPath = path.join(
+        process.cwd(),
+        "public",
+        "documents",
+        "Formats.pdf"
+      );
+      const formatsPdfBuffer = fs.readFileSync(formatsPdfPath);
+      zip.addFile("Formats.pdf", formatsPdfBuffer);
     }
 
     // Generate the zip buffer and return the response
