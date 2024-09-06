@@ -1185,23 +1185,20 @@ export default function UploadForm() {
             </motion.div>
           )}
 
-          {status && (
-            <div
-              className={`${
-                status ? "opacity-100" : "opacity-0"
-              } bg-secondary-400 text-white border border-primary-500/20 text-sm px-4 py-2 rounded-tr-xl rounded-bl-xl shadow-lg transition-opacity duration-300 ease-in-out z-100 flex justify-center items-center gap-2 -mt-4`}
-              style={{
-                minHeight: "40px",
-                width: "fit-content",
-                padding: "0 16px",
-              }}
-            >
-              {isGenerating && (
-                <ArrowPathIcon className="h-5 w-5 animate-spin text-primary-500" />
-              )}
-              {status}
-            </div>
-          )}
+          <div
+            className={`bg-secondary-400 text-white border border-primary-500/20 text-sm px-4 py-2 rounded-tr-xl rounded-bl-xl shadow-lg transition-opacity duration-300 ease-in-out z-100 flex justify-center items-center gap-2 -mt-4`}
+            style={{
+              minHeight: "40px",
+              width: "fit-content",
+              padding: "0 16px",
+              opacity: status ? "1" : "0",
+            }}
+          >
+            {isGenerating && (
+              <ArrowPathIcon className="h-5 w-5 animate-spin text-primary-500" />
+            )}
+            {status}
+          </div>
         </form>
       </div>
     </section>
