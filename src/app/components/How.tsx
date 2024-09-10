@@ -92,11 +92,11 @@ export default function How() {
                   <h2 className="text-3xl font-bold tracking-tight text-primary-500 sm:text-4xl">
                     Pack Pack Pack
                   </h2>
-                  <p className="mt-6 text-xl leading-7 text-white">
+                  <p className="mt-6 text-xl max-w-2xl leading-7 text-white">
                     This product was born from a problem I faced when switching
                     design software. Adobe had some community logo export
                     plugins, but when I moved to Affinity, I found no tools to
-                    solve this issue and save me time.
+                    solve this issue.
                   </p>
                 </div>
               </div>
@@ -142,8 +142,8 @@ export default function How() {
                   </h2>
                   <p className="mt-6 text-xl leading-7 text-white">
                     Packer isn&apos;t perfect, but it&apos;s a powerful tool.
-                    We&apos;re committed to improving it and making it the best
-                    it can be.
+                    We&apos;re here to improve it and make it the best it can
+                    be.
                   </p>
                   <p className="mt-6 text-xl leading-7 text-white">
                     This is where you come in. Support Packer by giving

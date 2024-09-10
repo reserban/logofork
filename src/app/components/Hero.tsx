@@ -1,9 +1,6 @@
 "use client";
 
-import { useState, Dispatch, SetStateAction } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { ChevronRightIcon } from "@heroicons/react/24/outline";
+import { useState, useEffect, Dispatch, SetStateAction } from "react";
 
 // Define the type for the props
 interface HeroProps {
@@ -12,6 +9,20 @@ interface HeroProps {
 
 export default function Hero({ setShowUploadForm }: HeroProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 640);
+    };
+
+    handleResize(); // Set initial value
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   return (
     <div className="relative">
@@ -28,8 +39,9 @@ export default function Hero({ setShowUploadForm }: HeroProps) {
             </p>
             <div className="mt-6 flex items-center justify-start sm:justify-center gap-x-6">
               <button
-                onClick={() => setShowUploadForm(true)}
-                className="cursor-pointer rounded-bl-xl rounded-tr-xl bg-primary-500 px-3.5 py-2.5 text-sm font-bold text-secondary-400 shadow-sm hover:bg-primary-500/5 hover:border-primary-500/60 hover:text-primary-500 border-primary-500/20 border focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transform transition-transform duration-500 hover:scale-105"
+                onClick={() => !isMobile && setShowUploadForm(true)}
+                className="cursor-pointer rounded-bl-xl rounded-tr-xl bg-primary-500 px-3.5 py-2.5 text-sm font-bold text-secondary-400 shadow-sm hover:bg-primary-500/5 hover:border-primary-500/60 hover:text-primary-500 border-primary-500/20 border focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transform transition-transform duration-500 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isMobile}
               >
                 <span className="sm:hidden">Start On Desktop</span>
                 <span className="hidden sm:inline">Start Now </span>
