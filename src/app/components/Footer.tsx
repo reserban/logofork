@@ -49,10 +49,12 @@ export default function Footer() {
 
   return (
     <div id="footer">
-      <div className="relative isolate">
+      <div className="relative isolate overflow-hidden">
+        {" "}
         <svg
-          className="absolute -mt-6 sm:-left-5 left-1/2 transform -translate-x-1/2 sm:translate-x-0 -z-10 sm:h-[17rem] h-[32rem] w-full stroke-primary-500/10 [mask-image:radial-gradient(32rem_40rem_at_center,white,transparent)]"
+          className="absolute top-48 sm:top-2 sm:-left-5 left-1/2 transform -translate-x-1/2 sm:translate-x-0 -z-10 sm:h-[60rem] h-[32rem] w-full stroke-primary-500/20 [mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)]"
           aria-hidden="true"
+          style={{ pointerEvents: "none" }}
         >
           <defs>
             <pattern
@@ -68,12 +70,13 @@ export default function Footer() {
           </defs>
           <rect
             width="100%"
-            height="100%"
+            height="32%"
+            y="0"
             strokeWidth={0}
             fill="url(#1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84)"
           />
         </svg>
-        <div className="relative pt-24 sm:pt-12 pb-16 overflow-hidden isolate">
+        <div className="relative pt-24 sm:pt-28 pb-16 overflow-hidden isolate">
           <div className="px-6 mx-auto max-w-7xl lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-y-10 max-w-7xl mx-auto gap-x-4">
               <div className="max-w-xl bg-secondary-400 text-white lg:max-w-md sm:max-w-md lg:col-span-2 border px-8 py-6 rounded-tl-ct rounded-br-ct border-primary-500/20 duration-500 hover:-translate-y-1">

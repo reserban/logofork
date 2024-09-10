@@ -4,6 +4,48 @@ import sharp from "sharp";
 import sharpIco from "sharp-ico";
 import fs from "fs";
 import path from "path";
+import { optimize } from "svgo";
+
+// Standardize SVG content
+function standardizeSVG(svgContent: string): string {
+  const result = optimize(svgContent, {
+    plugins: [
+      "removeDoctype",
+      "removeXMLProcInst",
+      "removeComments",
+      "removeMetadata",
+      "removeTitle",
+      "removeDesc",
+      "removeUselessDefs",
+      "removeEditorsNSData",
+      "removeEmptyAttrs",
+      "removeHiddenElems",
+      "removeEmptyText",
+      "removeEmptyContainers",
+      "cleanupEnableBackground",
+      "convertStyleToAttrs",
+      "convertColors",
+      "convertPathData",
+      "convertTransform",
+      "removeUnknownsAndDefaults",
+      "removeNonInheritableGroupAttrs",
+      "removeUselessStrokeAndFill",
+      "removeUnusedNS",
+      "cleanupIds",
+      "cleanupNumericValues",
+      "moveElemsAttrsToGroup",
+      "moveGroupAttrsToElems",
+      "collapseGroups",
+      "removeRasterImages",
+      "mergePaths",
+      "convertShapeToPath",
+      "sortAttrs",
+      "removeDimensions",
+    ],
+  });
+
+  return result.data;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,10 +67,10 @@ export async function POST(req: NextRequest) {
     // Filter valid files and folders
     const validFiles = files.filter((file) => file !== null);
     const validFolders = [
-      "02 Vertical",
-      "01 Horizontal",
-      "04 Logomark",
-      "03 Wordmark",
+      "Vertical",
+      "Horizontal",
+      "Logomark",
+      "Wordmark",
     ].filter((_, index) => files[index] !== null);
 
     if (validFiles.length === 0) {
@@ -39,9 +81,10 @@ export async function POST(req: NextRequest) {
     const allFolders = {
       Raster: ["PNG", "WEBP", "TIFF", "JPG", "Favicon"],
       Vector: ["Designer", "Illustrator", "SVG", "EPS", "PDF"],
+      Motion: ["Opacity", "Bounce", "Pulse", "Swing"],
     };
 
-    const gridSize = 2; // 2x2 grid
+    const gridSize = 2;
     const logoHeight = 300;
     const logoWidth = 500;
     const totalHeight =
@@ -70,6 +113,10 @@ export async function POST(req: NextRequest) {
         const folders = { ...allFolders };
         const safeFilename = packageName.replace(/[^a-zA-Z0-9.-]/g, "_");
 
+        // Optimize SVG content
+        let svgContent = fileBuffer.toString();
+        svgContent = standardizeSVG(svgContent); // Standardize SVG content
+
         // Process each selected mode
         await Promise.all(
           selectedModes.map(async (mode, colorIndex) => {
@@ -79,20 +126,20 @@ export async function POST(req: NextRequest) {
             const modeFilename = mode.toLowerCase();
 
             // Modify SVG content based on mode
-            let svgContent = fileBuffer.toString();
+            let modeSvgContent = svgContent;
             if (isBlack) {
-              svgContent = replaceColorsWithBlack(svgContent);
+              modeSvgContent = replaceColorsWithBlack(modeSvgContent);
             } else if (isWhite) {
-              svgContent = replaceColorsWithWhite(svgContent);
+              modeSvgContent = replaceColorsWithWhite(modeSvgContent);
             }
 
-            const svgBuffer = Buffer.from(svgContent);
+            const svgBuffer = Buffer.from(modeSvgContent);
 
             // Add vector files to zip
             if (selectedExtensions.includes("svg")) {
               addFileToZip(
                 zip,
-                rootFolderName,
+                `Individual/${validFolders[index]}`,
                 modeFolderName,
                 folders,
                 "Vector",
@@ -105,7 +152,7 @@ export async function POST(req: NextRequest) {
             if (selectedExtensions.includes("ai")) {
               addFileToZip(
                 zip,
-                rootFolderName,
+                `Individual/${validFolders[index]}`,
                 modeFolderName,
                 folders,
                 "Vector",
@@ -118,7 +165,7 @@ export async function POST(req: NextRequest) {
             if (selectedExtensions.includes("eps")) {
               addFileToZip(
                 zip,
-                rootFolderName,
+                `Individual/${validFolders[index]}`,
                 modeFolderName,
                 folders,
                 "Vector",
@@ -131,7 +178,7 @@ export async function POST(req: NextRequest) {
             if (selectedExtensions.includes("afdesign")) {
               addFileToZip(
                 zip,
-                rootFolderName,
+                `Individual/${validFolders[index]}`,
                 modeFolderName,
                 folders,
                 "Vector",
@@ -142,8 +189,76 @@ export async function POST(req: NextRequest) {
               );
             }
 
+            // Generate CSS animations for Motion folder
+            if (selectedExtensions.includes("motion")) {
+              const animatedSvgContentOpacity = generateAnimatedSvg(
+                modeSvgContent,
+                "loop"
+              );
+              const animatedSvgContentBounce = generateAnimatedSvg(
+                modeSvgContent,
+                "bounce"
+              );
+              const animatedSvgContentPulse = generateAnimatedSvg(
+                modeSvgContent,
+                "pulse"
+              );
+              const animatedSvgContentSwing = generateAnimatedSvg(
+                modeSvgContent,
+                "swing"
+              );
+
+              addFileToZip(
+                zip,
+                `Individual/${validFolders[index]}`,
+                modeFolderName,
+                folders,
+                "Motion",
+                "Opacity",
+                `${safeFilename}-${logoType}-${modeFilename}-loop`,
+                Buffer.from(animatedSvgContentOpacity),
+                "svg"
+              );
+
+              addFileToZip(
+                zip,
+                `Individual/${validFolders[index]}`,
+                modeFolderName,
+                folders,
+                "Motion",
+                "Bounce",
+                `${safeFilename}-${logoType}-${modeFilename}-bounce`,
+                Buffer.from(animatedSvgContentBounce),
+                "svg"
+              );
+
+              addFileToZip(
+                zip,
+                `Individual/${validFolders[index]}`,
+                modeFolderName,
+                folders,
+                "Motion",
+                "Pulse",
+                `${safeFilename}-${logoType}-${modeFilename}-pulse`,
+                Buffer.from(animatedSvgContentPulse),
+                "svg"
+              );
+
+              addFileToZip(
+                zip,
+                `Individual/${validFolders[index]}`,
+                modeFolderName,
+                folders,
+                "Motion",
+                "Swing",
+                `${safeFilename}-${logoType}-${modeFilename}-swing`,
+                Buffer.from(animatedSvgContentSwing),
+                "svg"
+              );
+            }
+
             // Remove XML and SVG tags from the individual SVG content
-            const cleanedSvgContent = svgContent
+            const cleanedSvgContent = modeSvgContent
               .replace(/<\?xml.*?\?>/g, "") // Remove XML declaration
               .replace(/<!DOCTYPE.*?>/g, "") // Remove DOCTYPE declaration
               .replace(/<svg.*?>/g, "") // Remove opening SVG tag
@@ -178,11 +293,13 @@ export async function POST(req: NextRequest) {
                   background: { r: 0, g: 0, b: 0, alpha: 0 },
                 });
 
-              const pngBuffer = await sharpInstance.png().toBuffer();
+              const pngBuffer = await sharpInstance
+                .png({ quality: 80, compressionLevel: 9 })
+                .toBuffer(); // Adjusted quality and compression
               if (selectedExtensions.includes("png")) {
                 addFileToZip(
                   zip,
-                  rootFolderName,
+                  `Individual/${validFolders[index]}`,
                   modeFolderName,
                   folders,
                   "Raster",
@@ -232,12 +349,12 @@ export async function POST(req: NextRequest) {
                       },
                     ])
                     .flatten({ background: jpgBackgroundColor })
-                    .jpeg({ quality: 100 })
+                    .jpeg({ quality: 85 }) // Adjusted quality
                     .toBuffer();
 
                   addFileToZip(
                     zip,
-                    rootFolderName,
+                    `Individual/${validFolders[index]}`,
                     modeFolderName,
                     folders,
                     "Raster",
@@ -249,12 +366,12 @@ export async function POST(req: NextRequest) {
                 } else {
                   const jpgBuffer = await sharp(pngBuffer)
                     .flatten({ background: jpgBackgroundColor })
-                    .jpeg({ quality: 100 })
+                    .jpeg({ quality: 85 }) // Adjusted quality
                     .toBuffer();
 
                   addFileToZip(
                     zip,
-                    rootFolderName,
+                    `Individual/${validFolders[index]}`,
                     modeFolderName,
                     folders,
                     "Raster",
@@ -326,7 +443,7 @@ export async function POST(req: NextRequest) {
 
                     addFileToZip(
                       zip,
-                      rootFolderName,
+                      `Individual/${validFolders[index]}`,
                       mode,
                       folders,
                       "Favicon",
@@ -370,7 +487,7 @@ export async function POST(req: NextRequest) {
 
                   addFileToZip(
                     zip,
-                    rootFolderName,
+                    `Individual/${validFolders[index]}`,
                     mode,
                     folders,
                     "Favicon",
@@ -409,7 +526,7 @@ export async function POST(req: NextRequest) {
 
                   addFileToZip(
                     zip,
-                    rootFolderName,
+                    `Individual/${validFolders[index]}`,
                     mode,
                     folders,
                     "Favicon",
@@ -421,7 +538,7 @@ export async function POST(req: NextRequest) {
 
                   addFileToZip(
                     zip,
-                    rootFolderName,
+                    `Individual/${validFolders[index]}`,
                     mode,
                     folders,
                     "Favicon",
@@ -436,11 +553,11 @@ export async function POST(req: NextRequest) {
               // Process WEBP images
               if (selectedExtensions.includes("webp")) {
                 const webpBuffer = await sharp(pngBuffer)
-                  .webp({ quality: 80 })
+                  .webp({ quality: 75 }) // Adjusted quality
                   .toBuffer();
                 addFileToZip(
                   zip,
-                  rootFolderName,
+                  `Individual/${validFolders[index]}`,
                   modeFolderName,
                   folders,
                   "Raster",
@@ -457,11 +574,12 @@ export async function POST(req: NextRequest) {
                   .tiff({
                     compression: "lzw",
                     predictor: "horizontal",
+                    quality: 80, // Adjusted quality
                   })
                   .toBuffer();
                 addFileToZip(
                   zip,
-                  rootFolderName,
+                  `Individual/${validFolders[index]}`,
                   modeFolderName,
                   folders,
                   "Raster",
@@ -482,17 +600,14 @@ export async function POST(req: NextRequest) {
 
     if (selectedExtensions.includes("master")) {
       zip.addFile(
-        `05 Master/SVG/${packageName.replace(
-          /[^a-zA-Z0-9.-]/g,
-          "_"
-        )}-master.svg`,
+        `Master/SVG/${packageName.replace(/[^a-zA-Z0-9.-]/g, "_")}-master.svg`,
         masterSvgBuffer
       );
 
       // Convert master SVG to EPS, AFDesign, and AI formats
       if (selectedExtensions.includes("eps")) {
         zip.addFile(
-          `05 Master/EPS/${packageName.replace(
+          `Master/EPS/${packageName.replace(
             /[^a-zA-Z0-9.-]/g,
             "_"
           )}-master.eps`,
@@ -501,7 +616,7 @@ export async function POST(req: NextRequest) {
       }
       if (selectedExtensions.includes("afdesign")) {
         zip.addFile(
-          `05 Master/Designer/${packageName.replace(
+          `Master/Designer/${packageName.replace(
             /[^a-zA-Z0-9.-]/g,
             "_"
           )}-master.afdesign`,
@@ -510,7 +625,7 @@ export async function POST(req: NextRequest) {
       }
       if (selectedExtensions.includes("ai")) {
         zip.addFile(
-          `05 Master/Illustrator/${packageName.replace(
+          `Master/Illustrator/${packageName.replace(
             /[^a-zA-Z0-9.-]/g,
             "_"
           )}-master.ai`,
@@ -525,10 +640,10 @@ export async function POST(req: NextRequest) {
         process.cwd(),
         "public",
         "documents",
-        "Structure.pdf"
+        "Folders Structure.pdf"
       );
       const structurePdfBuffer = fs.readFileSync(structurePdfPath);
-      zip.addFile("Structure.pdf", structurePdfBuffer);
+      zip.addFile("Folders Structure.pdf", structurePdfBuffer);
     }
 
     if (selectedExtensions.includes("formats")) {
@@ -536,10 +651,10 @@ export async function POST(req: NextRequest) {
         process.cwd(),
         "public",
         "documents",
-        "Formats.pdf"
+        "Files Formats.pdf"
       );
       const formatsPdfBuffer = fs.readFileSync(formatsPdfPath);
-      zip.addFile("Formats.pdf", formatsPdfBuffer);
+      zip.addFile("Files Formats.pdf", formatsPdfBuffer);
     }
 
     // Generate the zip buffer and return the response
@@ -553,7 +668,10 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Error generating logo package:", error);
     return NextResponse.json(
-      { error: "Failed to generate logo package" },
+      {
+        error: "Failed to generate logo package",
+        details: (error as Error).message,
+      },
       { status: 500 }
     );
   }
@@ -646,4 +764,73 @@ function replaceColors(svgContent: string, color: string): string {
   modifiedContent = modifiedContent.replace(/url\(#[^)]+\)/g, color);
 
   return modifiedContent;
+}
+
+function generateAnimatedSvg(
+  svgContent: string,
+  animationType: string
+): string {
+  const animations = {
+    loop: `
+      @keyframes loop {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+      }
+      .loop {
+        animation: loop 3s infinite ease-in-out;
+      }
+    `,
+    bounce: `
+      @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+      }
+      .bounce {
+        animation: bounce 2s infinite ease-in-out;
+      }
+    `,
+    pulse: `
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+      .pulse {
+        animation: pulse 2s infinite ease-in-out;
+      }
+    `,
+    swing: `
+ @keyframes swing {
+        20% { transform: rotate(5deg); }
+        40% { transform: rotate(-5deg); }
+        60% { transform: rotate(3deg); }
+        80% { transform: rotate(-3deg); }
+        100% { transform: rotate(0deg); }
+      }
+      .swing {
+        animation: swing 3s infinite ease-in-out;
+      }
+    `,
+  };
+
+  const animationStyle = animations[animationType as keyof typeof animations];
+  const animationClass = animationType;
+
+  const styleTag = `
+    <style>
+      ${animationStyle}
+    </style>
+  `;
+
+  // Ensure the SVG has a group element to apply the animation class
+  if (!svgContent.includes("<g")) {
+    svgContent = svgContent.replace(
+      /<svg.*?>/,
+      (match) => `${match}<g class="${animationClass}">`
+    );
+    svgContent = svgContent.replace(/<\/svg>/, "</g></svg>");
+  } else {
+    svgContent = svgContent.replace(/<g/, `<g class="${animationClass}"`);
+  }
+
+  return svgContent.replace(/<svg.*?>/, (match) => `${match}${styleTag}`);
 }

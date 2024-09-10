@@ -155,19 +155,13 @@ export default function UploadForm() {
     useState<boolean>(false);
   const [selectedExtensions, setSelectedExtensions] = useState<string[]>([
     "svg",
+    "afdesign",
     "ai",
     "eps",
-    "afdesign",
     "png",
     "jpg",
-    "webp",
-    "tiff",
     "favicons",
     "color",
-    "black",
-    "white",
-    "formats",
-    "structure",
     "master",
   ]);
   const [showExtensionFilter, setShowExtensionFilter] =
@@ -806,35 +800,12 @@ export default function UploadForm() {
 
   return (
     <section className="max-w-4xl mx-auto px-4 pt-8 sm:pt-0 text-center">
-      <span className=" sm:hidden text-center font-semibold text-3xl sm:px-0">
-        <ComputerDesktopIcon className="h-20 w-20 text-primary-500 mb-4 mx-auto" />
+      <span className=" sm:hidden text-center font-semibold text-4xl sm:px-0">
+        <ComputerDesktopIcon className="h-20 w-20 text-primary-500 mt-40 mx-auto mb-4" />
         Packer is only<br></br> available{" "}
         <span className="text-primary-500">on desktop.</span>
       </span>
 
-      <svg
-        className="absolute -mt-5 top-40 sm:top-52 sm:-left-5 left-1/2 transform -translate-x-1/2 sm:translate-x-0 -z-10 sm:h-[32rem] h-[32rem] w-full stroke-primary-500/10 [mask-image:radial-gradient(32rem_30rem_at_center,white,transparent)]"
-        aria-hidden="true"
-      >
-        <defs>
-          <pattern
-            id="1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84"
-            width={180}
-            height={180}
-            x="116.3%"
-            y={-1}
-            patternUnits="userSpaceOnUse"
-          >
-            <path d="M.5 200V.5H200" fill="none" />
-          </pattern>
-        </defs>
-        <rect
-          width="100%"
-          height="100%"
-          strokeWidth={0}
-          fill="url(#1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84)"
-        />
-      </svg>
       <div className="hidden sm:inline">
         <form
           onSubmit={handleSubmit}
@@ -843,7 +814,8 @@ export default function UploadForm() {
           <PasteModal />
           <h1 className="text-4xl max-w-md text-center mb-6 mt-4 align center font-bold tracking-tight text-white sm:text-6xl">
             <span>
-              10 Seconds <span className="text-primary-500">Logo Package</span>
+              Pack Your Logos{" "}
+              <span className="text-primary-500">In Seconds</span>
             </span>
           </h1>
           <div className="flex justify-center">
@@ -898,9 +870,9 @@ export default function UploadForm() {
                           </h3>
                           {[
                             "svg",
+                            "afdesign",
                             "ai",
                             "eps",
-                            "afdesign",
                             "png",
                             "jpg",
                             "webp",
@@ -1033,70 +1005,71 @@ export default function UploadForm() {
                           <h3 className="text-white text-lg mb-2 mt-4 text-left">
                             Extras
                           </h3>
-                          {["Favicons", "Master", "Formats", "Structure"].map(
-                            (extra) => (
-                              <div
-                                key={extra}
-                                className="flex items-center mb-2"
+                          {[
+                            "Favicons",
+                            "Master",
+                            "Motion",
+                            "Formats",
+                            "Structure",
+                          ].map((extra) => (
+                            <div key={extra} className="flex items-center mb-2">
+                              <input
+                                type="checkbox"
+                                id={`checkbox-${extra}`}
+                                checked={selectedExtensions.includes(
+                                  extra.toLowerCase()
+                                )}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedExtensions((prev) =>
+                                    prev.includes(extra.toLowerCase())
+                                      ? prev.filter(
+                                          (e) => e !== extra.toLowerCase()
+                                        )
+                                      : [...prev, extra.toLowerCase()]
+                                  );
+                                }}
+                                className="hidden"
+                              />
+                              <label
+                                htmlFor={`checkbox-${extra}`}
+                                className="flex items-center cursor-pointer"
+                                onClick={(e) => e.stopPropagation()}
                               >
-                                <input
-                                  type="checkbox"
-                                  id={`checkbox-${extra}`}
-                                  checked={selectedExtensions.includes(
-                                    extra.toLowerCase()
-                                  )}
-                                  onChange={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedExtensions((prev) =>
-                                      prev.includes(extra.toLowerCase())
-                                        ? prev.filter(
-                                            (e) => e !== extra.toLowerCase()
-                                          )
-                                        : [...prev, extra.toLowerCase()]
-                                    );
-                                  }}
-                                  className="hidden"
-                                />
-                                <label
-                                  htmlFor={`checkbox-${extra}`}
-                                  className="flex items-center cursor-pointer"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <span
-                                    className={`w-5 h-5 inline-block mr-2 rounded border ${
-                                      selectedExtensions.includes(
-                                        extra.toLowerCase()
-                                      )
-                                        ? "bg-primary-500 border-primary-500"
-                                        : "bg-secondary-400 border-primary-500/20"
-                                    }`}
-                                    style={{ borderWidth: "1px" }}
-                                  >
-                                    {selectedExtensions.includes(
+                                <span
+                                  className={`w-5 h-5 inline-block mr-2 rounded border ${
+                                    selectedExtensions.includes(
                                       extra.toLowerCase()
-                                    ) && (
-                                      <svg
-                                        className="w-4 h-4 text-secondary-400"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        style={{ margin: "auto" }}
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth="2"
-                                          d="M5 13l4 4L19 7"
-                                        ></path>
-                                      </svg>
-                                    )}
-                                  </span>
-                                  <span className="text-white">{extra}</span>
-                                </label>
-                              </div>
-                            )
-                          )}
+                                    )
+                                      ? "bg-primary-500 border-primary-500"
+                                      : "bg-secondary-400 border-primary-500/20"
+                                  }`}
+                                  style={{ borderWidth: "1px" }}
+                                >
+                                  {selectedExtensions.includes(
+                                    extra.toLowerCase()
+                                  ) && (
+                                    <svg
+                                      className="w-4 h-4 text-secondary-400"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      style={{ margin: "auto" }}
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M5 13l4 4L19 7"
+                                      ></path>
+                                    </svg>
+                                  )}
+                                </span>
+                                <span className="text-white">{extra}</span>
+                              </label>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </motion.div>

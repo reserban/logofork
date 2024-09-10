@@ -30,7 +30,11 @@ const navigation = [
 
 const SHOW_NAV_ITEMS = true;
 
-export default function Navbar() {
+type NavbarProps = {
+  setShowUploadForm: (value: boolean) => void;
+};
+
+export default function Navbar({ setShowUploadForm }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
@@ -71,7 +75,11 @@ export default function Navbar() {
   );
 
   return (
-    <header className="bg-black rounded-br-ct z-50 relative mb-6">
+    <motion.header
+      className="rounded-br-ct z-50 relative mb-6 sm:bg-none"
+      animate={{ backgroundColor: mobileMenuOpen ? "black" : "transparent" }}
+      transition={{ duration: 0.2 }}
+    >
       <nav
         className="flex items-center justify-between p-6 mx-auto max-w-7xl lg:px-8"
         aria-label="Global"
@@ -79,6 +87,7 @@ export default function Navbar() {
         <div className="flex lg:flex-1">
           <Link href="/">
             <Image
+              onClick={() => setShowUploadForm(false)}
               className="w-36 h-auto transition-transform duration-500 transform hover:scale-105 cursor-pointer"
               src="/photos/logo.svg"
               alt="Unzet Logo"
@@ -128,6 +137,6 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </motion.header>
   );
 }
