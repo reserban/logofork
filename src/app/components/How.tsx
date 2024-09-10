@@ -162,6 +162,8 @@ export default function How() {
                   </Link>
                   <Link
                     href="https://buymeacoffee.com/theserban"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="flex text-sm font-semibold leading-6 text-white transition-all duration-500 transform gap-x-0.5 hover:gap-x-1 hover:scale-105 hover:text-primary-500 cursor-pointer"
                   >
                     Donate
