@@ -47,7 +47,7 @@ export default function Home() {
     <ErrorBoundary>
       <div className="bg-black relative">
         <svg
-          className="fixed top-48 sm:top-2 sm:-left-5 left-1/2 transform -translate-x-1/2 sm:translate-x-0 z-0 sm:h-[60rem] h-[32rem] w-full stroke-primary-500/20 [mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)]"
+          className="fixed sm:-left-5 top-0 sm:top-2 left-1/2 transform -translate-x-1/2 sm:translate-x-0 z-0 sm:h-[64rem] h-[52rem] w-full stroke-primary-500/20 [mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)]"
           aria-hidden="true"
         >
           <defs>
@@ -91,7 +91,7 @@ export default function Home() {
               clipPath:
                 "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
             }}
-            className="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-[#edff00] to-[#000] opacity-20 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem] z-0"
+            className="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-[#edff00] to-[#000] opacity-20 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem] z-0 "
           />
         </div>
         <div className="relative z-10">

@@ -161,7 +161,7 @@ export default function How() {
                     Join Discord
                   </Link>
                   <Link
-                    href="buymeacoffee.com/theserban"
+                    href="https://buymeacoffee.com/theserban"
                     className="flex text-sm font-semibold leading-6 text-white transition-all duration-500 transform gap-x-0.5 hover:gap-x-1 hover:scale-105 hover:text-primary-500 cursor-pointer"
                   >
                     Donate

@@ -40,7 +40,7 @@ export default function Hero({ setShowUploadForm }: HeroProps) {
             <div className="mt-6 flex items-center justify-start sm:justify-center gap-x-6">
               <button
                 onClick={() => !isMobile && setShowUploadForm(true)}
-                className="cursor-pointer rounded-bl-xl rounded-tr-xl bg-primary-500 px-3.5 py-2.5 text-sm font-bold text-secondary-400 shadow-sm hover:bg-primary-500/5 hover:border-primary-500/60 hover:text-primary-500 border-primary-500/20 border focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transform transition-transform duration-500 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="cursor-pointer rounded-bl-xl rounded-tr-xl bg-primary-500 px-3.5 py-2.5 text-sm font-bold text-secondary-400 shadow-sm hover:bg-primary-500/5 hover:border-primary-500/60 hover:text-primary-500 border-primary-500/20 border focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transform transition-transform duration-500 hover:scale-105 disabled:bg-primary-700 disabled:cursor-not-allowed"
                 disabled={isMobile}
               >
                 <span className="sm:hidden">Start On Desktop</span>
