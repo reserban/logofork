@@ -83,7 +83,7 @@ export default function How() {
         id="how"
         className="flex items-center justify-center min-h-screen"
       >
-        <div className="relative px-6 pt-16 sm:pt-0 mt-20 pb-16 sm:pb-20 overflow-hidden isolate sm:py-28 lg:overflow-visible lg:px-0">
+        <div className="relative px-6 pt-6 sm:pt-0 mt-20 pb-4 sm:pb-20 overflow-hidden isolate sm:py-28 lg:overflow-visible lg:px-0">
           <div className="absolute inset-0 overflow-hidden -z-10"></div>
           <div className="grid max-w-2xl sm:max-w-4xl grid-cols-1 mx-auto gap-x-48 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-8">
             <div className="lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:mx-auto lg:grid lg:w-full lg:max-w-7xl lg:grid-cols-2 lg:gap-x-8 lg:px-8">
@@ -96,7 +96,7 @@ export default function How() {
                     This product was born from a problem I faced when switching
                     design software. Adobe had some community logo export
                     plugins, but when I moved to Affinity, I found no tools to
-                    solve this issue and save me time. So I created one.
+                    solve this issue and save me time.
                   </p>
                 </div>
               </div>
@@ -104,7 +104,7 @@ export default function How() {
             <div className="lg:col-span-2 lg:col-start-1 lg:row-start-2 lg:mx-auto lg:grid lg:w-full lg:max-w-7xl lg:grid-cols-2 lg:gap-x-8 lg:px-8">
               <div className="lg:pr-4">
                 <div className="max-w-2xl text-lg leading-7 text-white lg:max-w-xl">
-                  <ul role="list" className="space-y-8 text-white">
+                  <ul role="list" className="space-y-8 text-white text-xl">
                     <li className="flex gap-x-3">
                       <WalletIcon
                         className="flex-none w-5 h-5 mt-1 text-primary-500"
@@ -135,7 +135,7 @@ export default function How() {
                     </p>
                   </i>
                   <h2
-                    className="mt-10 text-3xl font-bold tracking-tight text-primary-500"
+                    className="mt-10 text-2xl font-bold tracking-tight text-primary-500"
                     id="how2"
                   >
                     Your support is important
@@ -161,7 +161,7 @@ export default function How() {
                     Join Discord
                   </Link>
                   <Link
-                    href=""
+                    href="buymeacoffee.com/theserban"
                     className="flex text-sm font-semibold leading-6 text-white transition-all duration-500 transform gap-x-0.5 hover:gap-x-1 hover:scale-105 hover:text-primary-500 cursor-pointer"
                   >
                     Donate
