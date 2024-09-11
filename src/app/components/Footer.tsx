@@ -109,12 +109,14 @@ export default function Footer() {
         <div className="px-8 mx-auto shadow-lg max-w-7xl sm:pb-8 pb-12">
           <div className="flex flex-row items-center gap-4 sm:py-0 -mt-8 sm:-mt-8 justify-between mb-2">
             <div className="flex items-center -mb-8">
-              <button
-                className="text-md sm:text-sm leading-5 text-left text-white sm:mt-0 -ml-2 sm:ml-0 hover:scale-102 duration-500 hover:text-primary-500"
-                onClick={() => (window.location.href = "/")}
+              <a
+                className="text-md sm:text-sm text-white text-left hover:scale-102 transform duration-500 hover:text-primary-500"
+                href="https://unzet.com"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 Copyright &copy; {new Date().getFullYear()} Unzet
-              </button>
+              </a>
             </div>
             <div className="flex items-center -mb-8">
               <button

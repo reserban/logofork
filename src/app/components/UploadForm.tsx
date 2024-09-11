@@ -8,7 +8,7 @@ import React, {
   RefObject,
 } from "react";
 import Image from "next/image";
-import { ComputerDesktopIcon } from "@heroicons/react/24/outline";
+import { CheckIcon, ComputerDesktopIcon } from "@heroicons/react/24/outline";
 
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -155,12 +155,9 @@ export default function UploadForm() {
     useState<boolean>(false);
   const [selectedExtensions, setSelectedExtensions] = useState<string[]>([
     "svg",
-    "afdesign",
-    "ai",
     "eps",
     "png",
     "jpg",
-    "favicons",
     "color",
     "master",
   ]);
@@ -856,28 +853,19 @@ export default function UploadForm() {
                   {showExtensionFilter && (
                     <motion.div
                       id="extension-filter"
-                      className="absolute right-0 mt-5 w-72 bg-secondary-400 py-4 pl-4 px-3 rounded-tl-3xl rounded-br-3xl border-primary-500/20 shadow-lg z-10 border"
+                      className="absolute right-0 mt-5 w-72  bg-secondary-400 py-4 pl-4 px-4 rounded-tl-3xl rounded-br-3xl border-primary-500/20 shadow-lg z-10 border"
                       onClick={(e) => e.stopPropagation()}
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="ml-3 grid grid-cols-2 gap-4">
                         <div>
-                          <h3 className="text-white text-lg mb-2 text-left">
-                            Formats
+                          <h3 className="text-white text-lg mb-1 text-left">
+                            Vector
                           </h3>
-                          {[
-                            "svg",
-                            "afdesign",
-                            "ai",
-                            "eps",
-                            "png",
-                            "jpg",
-                            "webp",
-                            "tiff",
-                          ].map((ext) => (
+                          {["svg", "eps", "afdesign", "ai"].map((ext) => (
                             <div key={ext} className="flex items-center mb-2">
                               <input
                                 type="checkbox"
@@ -906,6 +894,62 @@ export default function UploadForm() {
                                       ? ext === "svg"
                                         ? "bg-primary-700 border-primary-700"
                                         : "bg-primary-500 border-primary-500"
+                                      : "bg-secondary-400 border-primary-500/20"
+                                  }`}
+                                  style={{ borderWidth: "1px" }}
+                                >
+                                  {selectedExtensions.includes(ext) && (
+                                    <svg
+                                      className="w-4 h-4 text-secondary-400"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      style={{ margin: "auto" }}
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M5 13l4 4L19 7"
+                                      ></path>
+                                    </svg>
+                                  )}
+                                </span>
+                                <span className="text-white">
+                                  {ext.toUpperCase()}
+                                </span>
+                              </label>
+                            </div>
+                          ))}
+                          <h3 className="text-white text-lg mb-2 mt-4 text-left">
+                            Raster
+                          </h3>
+                          {["png", "jpg", "webp", "tiff"].map((ext) => (
+                            <div key={ext} className="flex items-center mb-2">
+                              <input
+                                type="checkbox"
+                                id={`checkbox-${ext}`}
+                                checked={selectedExtensions.includes(ext)}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedExtensions((prev) =>
+                                    prev.includes(ext)
+                                      ? prev.filter((e) => e !== ext)
+                                      : [...prev, ext]
+                                  );
+                                }}
+                                className="hidden"
+                              />
+                              <label
+                                htmlFor={`checkbox-${ext}`}
+                                className="flex items-center cursor-pointer"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <span
+                                  className={`w-5 h-5 inline-block mr-2 rounded border ${
+                                    selectedExtensions.includes(ext)
+                                      ? "bg-primary-500 border-primary-500"
                                       : "bg-secondary-400 border-primary-500/20"
                                   }`}
                                   style={{ borderWidth: "1px" }}
@@ -1006,8 +1050,8 @@ export default function UploadForm() {
                             Extras
                           </h3>
                           {[
-                            "Favicons",
                             "Master",
+                            "Favicons",
                             "Motion",
                             "Formats",
                             "Structure",
@@ -1070,6 +1114,44 @@ export default function UploadForm() {
                               </label>
                             </div>
                           ))}
+                        </div>
+                        <div className="col-span-2 flex gap-x-12">
+                          <a
+                            className="flex -mt-3 text-sm font-semibold leading-6 text-white transition-all duration-500 transform gap-x-0.5 hover:gap-x-1 hover:scale-105 hover:text-primary-500 cursor-pointer"
+                            onClick={() =>
+                              setSelectedExtensions([
+                                "svg",
+                                "eps",
+                                "afdesign",
+                                "ai",
+                                "png",
+                                "jpg",
+                                "webp",
+                                "tiff",
+                                "color",
+                                "black",
+                                "white",
+                                "master",
+                                "favicons",
+                                "motion",
+                                "formats",
+                                "structure",
+                              ])
+                            }
+                          >
+                            {" "}
+                            <CheckIcon className="w-4 mt-0.5 h-4" />
+                            Check All
+                          </a>
+                          <a
+                            className="flex ml-1 -mt-3 text-sm font-semibold leading-6 text-white transition-all duration-500 transform gap-x-0.5 hover:gap-x-1 hover:scale-105 hover:text-primary-500 cursor-pointer"
+                            onClick={() =>
+                              setSelectedExtensions(["svg", "color"])
+                            }
+                          >
+                            <XMarkIcon className="w-4 mt-1 h-4" />
+                            Uncheck All
+                          </a>
                         </div>
                       </div>
                     </motion.div>

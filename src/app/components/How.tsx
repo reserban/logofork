@@ -23,15 +23,15 @@ const Card: React.FC<CardProps> = ({
   imageHeight,
 }) => (
   <div
-    className={`mt-0 sm:mt-8 ring-1 ring-gray-400/10 sm:w-[33.8rem] sm:h-[16rem] w-[24rem] text-white p-6 rounded-tr-ct rounded-bl-ct border shadow-lg transition-transform duration-700 hover:-translate-y-1 ${className}`} // Fixed card size
+    className={`mt-0 sm:mt-8 ring-1 ring-gray-400/10 sm:w-[33.8rem] sm:h-[16rem] w-[28rem] text-white p-6 rounded-tr-ct rounded-bl-ct border shadow-lg transition-transform duration-700 hover:-translate-y-1 ${className}`} // Fixed card size
   >
     <div className="flex justify-center items-center w-full h-full">
       <Image
         src={image}
         alt="Card Image"
-        width={imageWidth} // Set image width
-        height={imageHeight} // Set image height
-        style={{ opacity, transition: "opacity 0.7s, width 0.7s, height 0.7s" }} // Add transition
+        width={imageWidth}
+        height={imageHeight}
+        style={{ opacity, transition: "opacity 0.7s, width 0.7s, height 0.7s" }}
         className="rounded-tr-ct rounded-bl-ct"
       />
     </div>
@@ -130,7 +130,7 @@ export default function How() {
                   </ul>
                   <i>
                     {" "}
-                    <p className="mt-6 font-light opacity-60">
+                    <p className="mt-6 font-light text-xl opacity-60">
                       Alexandru Serban - Founder @ Unzet
                     </p>
                   </i>
