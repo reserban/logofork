@@ -40,10 +40,10 @@ const Card: React.FC<CardProps> = ({
 
 export default function How() {
   const [cardState, setCardState] = useState("default");
+  const isMobile = window.innerWidth <= 768;
 
   useEffect(() => {
     const handleScroll = () => {
-      const isMobile = window.innerWidth <= 768;
       if (isMobile) {
         setCardState("how2"); // Set to the final state on mobile
       } else {
@@ -75,7 +75,7 @@ export default function How() {
     window.addEventListener("scroll", handleScroll);
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isMobile]);
 
   return (
     <>
@@ -88,6 +88,17 @@ export default function How() {
           <div className="grid max-w-2xl sm:max-w-4xl grid-cols-1 mx-auto gap-x-48 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-8">
             <div className="lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:mx-auto lg:grid lg:w-full lg:max-w-7xl lg:grid-cols-2 lg:gap-x-8 lg:px-8">
               <div className="lg:pr-4">
+                {isMobile && (
+                  <div className="w-full flex justify-center mb-8 -mt-4">
+                    <Card
+                      image="photos/horizontal_selected.svg"
+                      opacity={1}
+                      className="border-2 border-primary-500 bg-primary-500/20"
+                      imageWidth={460}
+                      imageHeight={360}
+                    />
+                  </div>
+                )}
                 <div className="max-w-2xl sm:max-w-5xl lg:max-w-xl mx-auto lg:mx-0">
                   <h2 className="text-3xl font-bold tracking-tight text-primary-500 sm:text-4xl">
                     Pack Pack Pack
@@ -172,38 +183,40 @@ export default function How() {
                 </div>
               </div>
             </div>
-            <div
-              id="sticky-card"
-              className="pt-5 mt-0 pl-12 sm:pl-5 pr-12 sm:-mt-12 -ml-12 sm:-ml-4 lg:-ml-12 lg:sticky lg:top-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:overflow-hidden transition-all duration-700" // Add transition
-            >
-              {cardState === "default" && (
-                <Card
-                  image="photos/horizontal.svg"
-                  opacity={0.5}
-                  className="border-2 border-dashed border-primary-500/40 bg-black/60"
-                  imageWidth={380}
-                  imageHeight={280}
-                />
-              )}
-              {cardState === "how1" && (
-                <Card
-                  image="photos/horizontal_hover.svg"
-                  opacity={1}
-                  className="border-2 border-primary-500/40 bg-primary-500/10"
-                  imageWidth={540}
-                  imageHeight={440}
-                />
-              )}
-              {cardState === "how2" && (
-                <Card
-                  image="photos/horizontal_selected.svg"
-                  opacity={1}
-                  className="border-2 border-primary-500 bg-primary-500/20"
-                  imageWidth={460}
-                  imageHeight={360}
-                />
-              )}
-            </div>
+            {!isMobile && (
+              <div
+                id="sticky-card"
+                className="hidden sm:inline pt-5 mt-0 pl-12 sm:pl-5 pr-12 sm:-mt-12 -ml-12 sm:-ml-4 lg:-ml-12 lg:sticky lg:top-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:overflow-hidden transition-all duration-700" // Add transition
+              >
+                {cardState === "default" && (
+                  <Card
+                    image="photos/horizontal.svg"
+                    opacity={0.5}
+                    className="border-2 border-dashed border-primary-500/40 bg-black/60"
+                    imageWidth={380}
+                    imageHeight={280}
+                  />
+                )}
+                {cardState === "how1" && (
+                  <Card
+                    image="photos/horizontal_hover.svg"
+                    opacity={1}
+                    className="border-2 border-primary-500/40 bg-primary-500/10"
+                    imageWidth={540}
+                    imageHeight={440}
+                  />
+                )}
+                {cardState === "how2" && (
+                  <Card
+                    image="photos/horizontal_selected.svg"
+                    opacity={1}
+                    className="border-2 border-primary-500 bg-primary-500/20"
+                    imageWidth={460}
+                    imageHeight={360}
+                  />
+                )}
+              </div>
+            )}
           </div>
         </div>
       </section>

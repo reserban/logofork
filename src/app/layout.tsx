@@ -11,9 +11,9 @@ export const metadata: Metadata = {
     default: "Logo Packer - Pack Pack Pack",
     template: "%s",
   },
-  description: "Pack your logo designs and seconds and deliver like a pro.",
+  description: "Pack your logo designs in seconds and deliver like a pro.",
   openGraph: {
-    description: `Pack your logo designs and seconds and deliver like a pro.`,
+    description: `Pack your logo designs in seconds and deliver like a pro.`,
     images: ["https://packer.unzet.com/og.jpg"],
   },
   icons: {
