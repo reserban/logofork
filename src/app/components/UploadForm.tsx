@@ -8,12 +8,7 @@ import React, {
   RefObject,
 } from "react";
 import Image from "next/image";
-import {
-  ChatBubbleBottomCenterTextIcon,
-  CheckIcon,
-  ComputerDesktopIcon,
-  InformationCircleIcon,
-} from "@heroicons/react/24/outline";
+import { CheckIcon, ComputerDesktopIcon } from "@heroicons/react/24/outline";
 
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -139,11 +134,7 @@ const truncateFileName = (fileName: string, maxLength: number) => {
   )}...${extension}`;
 };
 
-type UploadFormProps = {
-  refreshUploadForm?: boolean; // Make this prop optional
-};
-
-const UploadForm: React.FC<UploadFormProps> = ({ refreshUploadForm }) => {
+export default function UploadForm() {
   const packageNameInputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<Record<FileInputType, File | null>>({
     vertical: null,
@@ -452,7 +443,6 @@ const UploadForm: React.FC<UploadFormProps> = ({ refreshUploadForm }) => {
     return (
       <div
         key={type}
-        id={type === "vertical" ? "vertical-logo-drop-zone" : undefined}
         className={`relative w-full ${INDIVIDUAL_HEIGHT} border-2 ${
           isSelected
             ? "bg-primary-500/20 border-solid border-primary-500 hover:scale-102 duration-500"
@@ -567,7 +557,7 @@ const UploadForm: React.FC<UploadFormProps> = ({ refreshUploadForm }) => {
 
     return (
       <div
-        id="archive-zone"
+        id="archive-option"
         className={`relative w-full ${ARCHIVE_HEIGHT} border-2 ${
           isSelected
             ? "bg-primary-500/20 border-solid border-primary-500 hover:scale-102 duration-500"
@@ -845,11 +835,6 @@ const UploadForm: React.FC<UploadFormProps> = ({ refreshUploadForm }) => {
                         ? "bg-primary-500 text-secondary-400 cursor-pointer rounded-bl-lg rounded-tr-lg px-2.5 py-1"
                         : "text-white cursor-pointer rounded-bl-lg rounded-tr-lg px-2.5 py-1 hover:text-primary-500 hover:scale-95 duration-500"
                     }
-                    id={
-                      option.value === "archive"
-                        ? "archive-option"
-                        : "individual-option"
-                    }
                   >
                     {option.label}
                   </Radio>
@@ -859,14 +844,12 @@ const UploadForm: React.FC<UploadFormProps> = ({ refreshUploadForm }) => {
                 className="ml-4 w-5 h-5 -mt-2 text-white cursor-pointer hover:text-primary-500 hover:scale-105 duration-500"
                 onClick={handleRefresh}
               />
-
               <div className="relative">
                 <FunnelIcon
                   id="filter-icon"
                   className="ml-3 w-5 h-5 -mt-2 text-white cursor-pointer hover:text-primary-500 hover:scale-105 duration-500"
                   onClick={handleFilterIconClick}
                 />
-
                 <AnimatePresence>
                   {showExtensionFilter && (
                     <motion.div
@@ -1212,9 +1195,10 @@ const UploadForm: React.FC<UploadFormProps> = ({ refreshUploadForm }) => {
                 transition={{ duration: 0.3 }}
               >
                 <div className="flex flex-row border border-primary-500/20 rounded-tr-xl rounded-bl-xl sm:flex-row whitespace-nowrap justify-center mt-3 mb-7 gap-y-4 -mr-0  gap-x-2">
-                  <div className="flex-grow" id="package-name">
+                  <div className="flex-grow">
                     <input
                       type="text"
+                      id="package-name"
                       ref={packageNameInputRef}
                       value={packageName}
                       onChange={handlePackageNameChange}
@@ -1222,10 +1206,7 @@ const UploadForm: React.FC<UploadFormProps> = ({ refreshUploadForm }) => {
                       placeholder="Package Name"
                     />
                   </div>
-                  <div
-                    className="flex-shrink-0 w-full sm:w-auto"
-                    id="color-picker"
-                  >
+                  <div className="flex-shrink-0 w-full sm:w-auto">
                     <CustomColorPicker
                       color={selectedColor}
                       onChange={setSelectedColor}
@@ -1244,7 +1225,6 @@ const UploadForm: React.FC<UploadFormProps> = ({ refreshUploadForm }) => {
                         !showPackageNameInput ||
                         Object.values(files).every((file) => file === null)
                       }
-                      id="generate-button"
                     >
                       Generate
                     </button>
@@ -1262,7 +1242,7 @@ const UploadForm: React.FC<UploadFormProps> = ({ refreshUploadForm }) => {
             >
               <a
                 onClick={handleTrySample}
-                className="py-2 flex mb-8  text-sm font-semibold leading-6 text-white transition-all duration-500 transform gap-x-0.5 hover:gap-x-1 hover:scale-105 hover:text-primary-500 cursor-pointer"
+                className="py-2 flex mb-8 mt-1 text-sm font-semibold leading-6 text-white transition-all duration-500 transform gap-x-0.5 hover:gap-x-1 hover:scale-105 hover:text-primary-500 cursor-pointer"
               >
                 Try a Sample
                 <ChevronRightIcon className="w-4 mt-1 h-4" />
@@ -1282,7 +1262,7 @@ const UploadForm: React.FC<UploadFormProps> = ({ refreshUploadForm }) => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
                   transition={{ duration: 0.5 }}
-                  className="absolute bg-secondary-400 text-white border border-primary-500/20 text-sm px-4 py-2 -mt-4 rounded-tr-xl rounded-bl-xl shadow-lg z-100 flex justify-center items-center gap-2 ml-2"
+                  className="absolute bg-secondary-400 text-white border border-primary-500/20 text-sm px-4 py-2 -mt-4 rounded-tr-xl rounded-bl-xl shadow-lg z-100 flex justify-center items-center gap-2"
                   style={{
                     minHeight: "40px",
                     width: "fit-content",
@@ -1301,6 +1281,4 @@ const UploadForm: React.FC<UploadFormProps> = ({ refreshUploadForm }) => {
       </div>
     </section>
   );
-};
-
-export default UploadForm;
+}

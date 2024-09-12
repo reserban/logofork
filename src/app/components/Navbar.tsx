@@ -89,47 +89,6 @@ const startIntroJs = (showUploadForm: boolean) => {
     localStorage.setItem("tutorialSkipped", "true");
   });
 
-  intro.onbeforechange(function () {
-    const verticalDropZone = document.querySelector("#vertical-logo-drop-zone");
-
-    if (this._currentStep === 2) {
-      const archiveRadioButton = document.querySelector("#archive-option");
-      if (
-        archiveRadioButton &&
-        !(archiveRadioButton as HTMLInputElement).checked
-      ) {
-        (archiveRadioButton as HTMLInputElement).click();
-        (archiveRadioButton as HTMLInputElement).blur(); // Remove focus after clicking
-      }
-    }
-
-    if (this._currentStep === 1) {
-      const individualRadioButton =
-        document.querySelector("#individual-option");
-      if (
-        individualRadioButton &&
-        !(individualRadioButton as HTMLInputElement).checked
-      ) {
-        (individualRadioButton as HTMLInputElement).click();
-        (individualRadioButton as HTMLInputElement).blur(); // Remove focus after clicking
-      }
-
-      if (verticalDropZone) {
-        verticalDropZone.classList.add(
-          "hover:bg-primary-500/10",
-          "hover:scale-102"
-        );
-      }
-    } else if (verticalDropZone) {
-      verticalDropZone.classList.remove(
-        "hover:bg-primary-500/10",
-        "hover:scale-102"
-      );
-    }
-
-    return true; // Ensure the callback returns a boolean
-  });
-
   intro.start();
 };
 
