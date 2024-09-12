@@ -69,7 +69,10 @@ export default function Home() {
             fill="url(#1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84)"
           />
         </svg>
-        <Navbar setShowUploadForm={setShowUploadForm} />
+        <Navbar
+          showUploadForm={showUploadForm}
+          setShowUploadForm={setShowUploadForm}
+        />
         <div
           aria-hidden="true"
           className="fixed inset-x-0 -top-40 z-0 transform-gpu overflow-hidden blur-3xl sm:-top-80"

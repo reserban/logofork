@@ -1,18 +1,29 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  ChangeEvent,
+  FormEvent,
+  DragEvent,
+  RefObject,
+} from "react";
 import {
   Bars3Icon,
   XMarkIcon,
-  ChevronRightIcon,
+  ChatBubbleBottomCenterTextIcon,
   SwatchIcon,
   ArrowPathRoundedSquareIcon,
   ClipboardIcon,
   BookmarkIcon,
   SquaresPlusIcon,
 } from "@heroicons/react/24/outline";
-import Image from "next/image";
-import Link from "next/link";
 
-import { AnimatePresence, motion } from "framer-motion"; // Import AnimatePresence
+import Link from "next/link";
+import Image from "next/image";
+
+import { AnimatePresence, motion } from "framer-motion";
+import introJs from "intro.js";
+import "intro.js/introjs.css";
 
 type NavigationItem = {
   name: string;
@@ -20,44 +31,140 @@ type NavigationItem = {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
-const navigation = [
-  { name: "The Lab", href: "#products", icon: SwatchIcon },
-  { name: "Process", href: "#how", icon: ArrowPathRoundedSquareIcon },
-  { name: "Values", href: "#values", icon: SquaresPlusIcon },
-  { name: "Tools", href: "#tools", icon: ClipboardIcon },
-  { name: "About", href: "#founder", icon: BookmarkIcon },
-];
-
-const SHOW_NAV_ITEMS = true;
-
 type NavbarProps = {
-  setShowUploadForm: (value: boolean) => void;
+  setShowUploadForm: (show: boolean) => void;
+  showUploadForm: boolean;
 };
 
-export default function Navbar({ setShowUploadForm }: NavbarProps) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const mobileMenuRef = useRef<HTMLDivElement>(null);
+const startIntroJs = (showUploadForm: boolean) => {
+  const intro = introJs();
+  const steps = [
+    {
+      element: "#tutorial-start",
+      intro:
+        "Welcome to the Logo Packer! You can skip this tutorial if you wish.",
+    },
+    {
+      element: "#vertical-logo-drop-zone",
+      intro: "Drag and drop, upload or paste the logos you need.",
+    },
+    {
+      element: "#archive-option",
+      intro: "Or select an archive.",
+    },
+    {
+      element: "#filter-icon",
+      intro: "You can select what you need.",
+    },
+  ];
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        mobileMenuRef.current &&
-        !mobileMenuRef.current.contains(event.target as Node)
-      ) {
-        setMobileMenuOpen(false);
+  if (showUploadForm) {
+    steps.push(
+      {
+        element: "#package-name",
+        intro: "You can change the company name here.",
+      },
+      {
+        element: "#color-picker",
+        intro: "This is the background color for JPG and favicons.",
+      },
+      {
+        element: "#generate-button",
+        intro: "Click here to generate your logo package. Enjoy!",
       }
-    };
+    );
+  }
 
-    if (mobileMenuOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
+  intro.setOptions({
+    steps,
+    tooltipClass: "customTooltip",
+    showButtons: false,
+  });
+
+  intro.oncomplete(() => {
+    localStorage.setItem("tutorialSkipped", "true");
+  });
+
+  intro.onexit(() => {
+    localStorage.setItem("tutorialSkipped", "true");
+  });
+
+  intro.onbeforechange(function () {
+    const verticalDropZone = document.querySelector("#vertical-logo-drop-zone");
+
+    if (this._currentStep === 2) {
+      const archiveRadioButton = document.querySelector("#archive-option");
+      if (
+        archiveRadioButton &&
+        !(archiveRadioButton as HTMLInputElement).checked
+      ) {
+        (archiveRadioButton as HTMLInputElement).click();
+        (archiveRadioButton as HTMLInputElement).blur(); // Remove focus after clicking
+      }
     }
 
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [mobileMenuOpen]);
+    if (this._currentStep === 1) {
+      const individualRadioButton =
+        document.querySelector("#individual-option");
+      if (
+        individualRadioButton &&
+        !(individualRadioButton as HTMLInputElement).checked
+      ) {
+        (individualRadioButton as HTMLInputElement).click();
+        (individualRadioButton as HTMLInputElement).blur(); // Remove focus after clicking
+      }
+
+      if (verticalDropZone) {
+        verticalDropZone.classList.add(
+          "hover:bg-primary-500/10",
+          "hover:scale-102"
+        );
+      }
+    } else if (verticalDropZone) {
+      verticalDropZone.classList.remove(
+        "hover:bg-primary-500/10",
+        "hover:scale-102"
+      );
+    }
+
+    return true; // Ensure the callback returns a boolean
+  });
+
+  intro.start();
+};
+
+export default function Navbar({
+  setShowUploadForm,
+  showUploadForm,
+}: NavbarProps) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const [files, setFiles] = useState<{ [key: string]: File | null }>({});
+  const [tutorialShown, setTutorialShown] = useState(false);
+
+  useEffect(() => {
+    const tutorialSkipped = localStorage.getItem("tutorialSkipped");
+    if (!tutorialSkipped && showUploadForm && !tutorialShown) {
+      startIntroJs(showUploadForm);
+      setTutorialShown(true);
+    }
+  }, [showUploadForm, tutorialShown]);
+
+  useEffect(() => {
+    if (Object.values(files).some((file) => file !== null)) {
+      startIntroJs(showUploadForm);
+    }
+  }, [files, showUploadForm]);
+
+  const navigation = [
+    { name: "The Lab", href: "#products", icon: SwatchIcon },
+    { name: "Process", href: "#how", icon: ArrowPathRoundedSquareIcon },
+    { name: "Values", href: "#values", icon: SquaresPlusIcon },
+    { name: "Tools", href: "#tools", icon: ClipboardIcon },
+    { name: "About", href: "#founder", icon: BookmarkIcon },
+  ];
+
+  const SHOW_NAV_ITEMS = true;
 
   const UnzetButton = () => (
     <button
@@ -102,6 +209,22 @@ export default function Navbar({ setShowUploadForm }: NavbarProps) {
           </span>
         </div>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:gap-3 ">
+          <AnimatePresence>
+            {showUploadForm && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.3 }}
+              >
+                <ChatBubbleBottomCenterTextIcon
+                  id="tutorial-start"
+                  className="mr-0.5 w-5 h-5 mt-0.5 text-white cursor-pointer hover:text-primary-500 hover:scale-105 duration-500"
+                  onClick={() => startIntroJs(showUploadForm)}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
           <UnzetButton />
         </div>
         <div className="flex lg:hidden">
