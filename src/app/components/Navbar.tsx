@@ -46,7 +46,7 @@ const startIntroJs = (showUploadForm: boolean) => {
     },
     {
       element: "#logo",
-      intro: "You can always get back on the landing page.",
+      intro: "You can always go back to the landing page.",
     },
     {
       element: "#vertical-logo-drop-zone",
@@ -58,18 +58,18 @@ const startIntroJs = (showUploadForm: boolean) => {
     },
     {
       element: "#filter-icon",
-      intro: "Select what file types you need in the package.",
+      intro: "Select which file types you need in the package.",
     },
     {
       element: "#all-logos",
-      intro: "And when you are ready with the files.",
+      intro: "And when you're ready with the files...",
     },
     {
       element: "#company-name",
-      intro: "Choose the background color, name and hit generate.",
+      intro: "...choose the background color, name and hit generate!",
     },
     {
-      intro: "Hope you love this tool <3 Unzet.",
+      intro: "Hope you love <3 this tool ~ Unzet.",
     },
   ];
 

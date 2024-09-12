@@ -772,10 +772,12 @@ export default function UploadForm() {
           className="bg-secondary-400 px-6 py-6 rounded-tr-ct rounded-bl-ct border border-primary-500/20 shadow-lg w-72"
           onClick={(e) => e.stopPropagation()}
         >
-          <h2 className="text-lg font-medium mb-1 text-primary-500 ">
+          <h2 className="text-lg font-medium  mb-1 text-primary-500 ">
             Logo Content
           </h2>
-          <p className="mb-5 text-md">SVG, Designer or Illustrator</p>
+          <p className="mb-5 text-md text-white">
+            SVG, Designer or Illustrator
+          </p>
           <textarea
             ref={textareaRef}
             value={pastedContent}
