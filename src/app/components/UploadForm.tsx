@@ -806,7 +806,7 @@ export default function UploadForm() {
     <section className="max-w-4xl mx-auto px-4 pt-8 sm:pt-0 text-center">
       <span className=" sm:hidden text-center text-white font-semibold text-4xl sm:px-0">
         <ComputerDesktopIcon className="h-20 w-20 text-primary-500 mt-40 mx-auto mb-4" />
-        Packer is only<br></br> available{" "}
+        Logofork is only<br></br> available{" "}
         <span className="text-primary-500">on desktop.</span>
       </span>
 

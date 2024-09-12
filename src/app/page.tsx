@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import UploadForm from "./components/UploadForm";
 import Hero from "./components/Hero";
 import How from "./components/How";
+import Formats from "./components/Formats";
 import Features from "./components/Features";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -13,6 +14,7 @@ export default function Home() {
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [showHeroGroup, setShowHeroGroup] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     try {
@@ -43,32 +45,55 @@ export default function Home() {
     }
   }, []);
 
+  useEffect(() => {
+    function handleResize() {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+      setIsMobile(window.innerWidth <= 768);
+    }
+
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Call once to set initial size
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <ErrorBoundary>
       <div className="bg-black relative">
-        <svg
-          className="fixed sm:-left-5 top-0 sm:top-2 left-1/2 transform -translate-x-1/2 sm:translate-x-0 z-0 sm:h-[64rem] h-[52rem] w-full stroke-primary-500/20 [mask-image:radial-gradient(32rem_32rem_at_center,white,transparent)]"
-          aria-hidden="true"
-        >
-          <defs>
-            <pattern
-              id="1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84"
-              width={180}
-              height={180}
-              x="116.3%"
-              y={-1}
-              patternUnits="userSpaceOnUse"
-            >
-              <path d="M.5 200V.5H200" fill="none" />
-            </pattern>
-          </defs>
-          <rect
-            width="100%"
-            height="100%"
-            strokeWidth={0}
-            fill="url(#1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84)"
-          />
-        </svg>
+        <div className="fixed w-full h-full" style={{ overflow: "hidden" }}>
+          <svg
+            className="absolute mt-1 stroke-primary-500/20 [mask-image:radial-gradient(52rem_32rem_at_center,white,transparent)]"
+            aria-hidden="true"
+            style={{
+              width: "100%",
+              height: "100%",
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)",
+              minWidth: "8124px",
+              minHeight: "100%",
+            }}
+          >
+            <defs>
+              <pattern
+                id="1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84"
+                width={180}
+                height={180}
+                x="100"
+                y={-1}
+                patternUnits="userSpaceOnUse"
+              >
+                <path d="M.5 200V.5H200" fill="none" />
+              </pattern>
+            </defs>
+            <rect
+              width="100%"
+              height="100%"
+              strokeWidth={0}
+              fill="url(#1f932ae7-37de-4c0a-a8b0-a6e3b4d44b84)"
+            />
+          </svg>
+        </div>
         <Navbar
           showUploadForm={showUploadForm}
           setShowUploadForm={setShowUploadForm}
@@ -109,6 +134,7 @@ export default function Home() {
         {!showUploadForm && showHeroGroup && (
           <div key="heroGroup" className="relative z-10">
             <Hero setShowUploadForm={setShowUploadForm} />
+            <Formats />
             <How />
             <Features />
             <Footer />

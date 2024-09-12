@@ -23,7 +23,7 @@ const Card: React.FC<CardProps> = ({
   imageHeight,
 }) => (
   <div
-    className={`mt-0 sm:mt-8 ring-1 ring-gray-400/10 sm:w-[33.8rem] sm:h-[16rem] w-[28rem] text-white p-6 rounded-tr-ct rounded-bl-ct border shadow-lg transition-transform duration-700 hover:-translate-y-1 ${className}`} // Fixed card size
+    className={`mt-0 sm:mt-8 ring-1 ring-gray-400/10 sm:w-[33.8rem] sm:h-[16rem] w-[28rem] text-white p-6 rounded-tr-ctx rounded-bl-ctx border shadow-lg transition-transform duration-700 hover:-translate-y-1 ${className}`} // Fixed card size
   >
     <div className="flex justify-center items-center w-full h-full">
       <Image
@@ -74,11 +74,8 @@ export default function How() {
 
   return (
     <>
-      <section
-        id="how"
-        className="flex items-center justify-center min-h-screen"
-      >
-        <div className="relative px-6 pt-6 sm:pt-0 mt-20 pb-4 sm:pb-20 overflow-hidden isolate sm:py-28 lg:overflow-visible lg:px-0">
+      <section id="how">
+        <div className="relative px-6 pt-20 sm:pt-20 pb-6  sm:pb-20 overflow-hidden isolate sm:py-20 lg:overflow-visible lg:px-0">
           <div className="absolute inset-0 overflow-hidden -z-10"></div>
           <div className="grid max-w-2xl sm:max-w-4xl grid-cols-1 mx-auto gap-x-48 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-8">
             <div className="lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:mx-auto lg:grid lg:w-full lg:max-w-7xl lg:grid-cols-2 lg:gap-x-8 lg:px-8">
@@ -116,7 +113,7 @@ export default function How() {
                         aria-hidden="true"
                       />
                       <span>
-                        Packer works with whatever you are using, be it
+                        Logofork works with whatever you are using, be it
                         Illustrator, Affinity Designer, or Inkscape. It&apos;s
                         designed to support you across different platforms.
                       </span>
@@ -129,7 +126,7 @@ export default function How() {
                       <span>
                         Why fewer options than other similar softwares? I
                         believe more options can confuse users. That&apos;s why
-                        we keep Packer simple and consistent for everyone.
+                        we keep Logofork simple and consistent for everyone.
                       </span>
                     </li>
                   </ul>
@@ -146,12 +143,12 @@ export default function How() {
                     Your support is important
                   </h2>
                   <p className="mt-6 text-xl leading-7 text-white">
-                    Packer isn&apos;t perfect, but it&apos;s a powerful tool.
+                    Logofork isn&apos;t perfect, but it&apos;s a powerful tool.
                     We&apos;re here to improve it and make it the best it can
                     be.
                   </p>
                   <p className="mt-6 text-xl leading-7 text-white">
-                    This is where you come in. Support Packer by giving
+                    This is where you come in. Support Logofork by giving
                     feedback, donating to keep it running, or simply spreading
                     the word. Your support motivates us to keep going.
                   </p>

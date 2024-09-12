@@ -30,12 +30,12 @@ export default function Hero({ setShowUploadForm }: HeroProps) {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-left sm:text-center">
             <h1 className="mx-auto max-w-2xl text-4xl font-bold tracking-tight text-white sm:text-6xl lg:col-span-2 xl:col-auto text-left sm:text-center items-center">
-              Complete Package{" "}
-              <span className="text-primary-500">From Your Designs</span>
+              Complete Logo Package{" "}
+              <span className="text-primary-500">From A Vector File</span>
             </h1>
             <p className="mt-6 text-lg leading-8 text-white max-w-xl mx-auto text-left sm:text-center">
-              Drag-and-drop, paste or upload your SVGs, hit the generate button
-              and instantly get every file type you or your client needs.
+              Drag and drop, paste, or upload your SVG logos and get every file
+              type you or your client needs, in seconds.
             </p>
             <div className="mt-6 flex items-center justify-start sm:justify-center gap-x-6">
               <button

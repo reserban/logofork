@@ -11,6 +11,7 @@ module.exports = {
       },
       borderRadius: {
         ct: "2rem",
+        ctx: "3rem",
         cts: "1.5rem",
       },
       colors: {

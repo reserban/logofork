@@ -14,10 +14,10 @@ export default function Features() {
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl sm:text-center">
           <p className="text-3xl font-bold tracking-tight text-primary-500 sm:text-4xl">
-            From Packer to Client
+            Directly to Client
           </p>
           <p className="mt-6 text-xl leading-8 text-white">
-            Packer uses industry standards to meet any project&apos;s needs.
+            Logofork uses industry standards to meet any project&apos;s needs.
             Simply take the zip file you get and send it directly to your
             client.
           </p>

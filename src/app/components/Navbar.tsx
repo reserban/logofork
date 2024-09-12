@@ -42,7 +42,7 @@ const startIntroJs = (showUploadForm: boolean) => {
     {
       element: "#tutorial-start",
       intro:
-        "Welcome to Packer! Use left arrow to learn! You can skip this tutorial if you wish.",
+        "Welcome to Logofork! Use right arrow → to learn! Skip this tutorial by pressing X.",
     },
     {
       element: "#logo",
@@ -223,6 +223,27 @@ export default function Navbar({
     }
   }, [files, showUploadForm]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node)
+      ) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    if (mobileMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [mobileMenuOpen]);
+
   const navigation = [
     { name: "The Lab", href: "#products", icon: SwatchIcon },
     { name: "Process", href: "#how", icon: ArrowPathRoundedSquareIcon },
@@ -263,7 +284,7 @@ export default function Navbar({
             <Image
               onClick={() => setShowUploadForm(false)}
               id="logo"
-              className="w-36 h-auto transition-transform duration-500 transform hover:scale-105 cursor-pointer"
+              className="w-40 h-auto transition-transform duration-500 transform hover:scale-105 cursor-pointer"
               src="/photos/logo.svg"
               alt="Unzet Logo"
               width={128}
@@ -273,7 +294,7 @@ export default function Navbar({
         </div>
         <div className="hidden lg:flex lg:flex-1 lg:justify-center lg:items-center">
           <span className="text-white/60 mt-1 text-sm">
-            Packer Public Beta v2.0.1
+            Logofork Public Beta v2.0.1
           </span>
         </div>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:gap-3 ">

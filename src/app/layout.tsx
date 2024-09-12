@@ -5,16 +5,16 @@ import "./globals.css";
 const dmSans = DM_Sans({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://packer.unzet.com"),
+  metadataBase: new URL("https://logofork.com"),
   keywords: ["startups", "tech"],
   title: {
-    default: "Logo Packer - Pack Pack Pack",
+    default: "Logofork - Pack Pack Pack",
     template: "%s",
   },
   description: "Pack your logo designs in seconds and deliver like a pro.",
   openGraph: {
     description: `Pack your logo designs in seconds and deliver like a pro.`,
-    images: ["https://packer.unzet.com/og.jpg"],
+    images: ["https://logofork.com/og.jpg"],
   },
   icons: {
     icon: "/photos/favicon.ico",
