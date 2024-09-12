@@ -42,51 +42,159 @@ const startIntroJs = (showUploadForm: boolean) => {
     {
       element: "#tutorial-start",
       intro:
-        "Welcome to the Logo Packer! You can skip this tutorial if you wish.",
+        "Welcome to Packer! Use left arrow to learn! You can skip this tutorial if you wish.",
+    },
+    {
+      element: "#logo",
+      intro: "You can always get back on the landing page.",
     },
     {
       element: "#vertical-logo-drop-zone",
       intro: "Drag and drop, upload or paste the logos you need.",
     },
     {
-      element: "#archive-option",
-      intro: "Or select an archive.",
+      element: "#all-logos",
+      intro: "Or upload an archive with all logo types inside.",
     },
     {
       element: "#filter-icon",
-      intro: "You can select what you need.",
+      intro: "Select what file types you need in the package.",
+    },
+    {
+      element: "#all-logos",
+      intro: "And when you are ready with the files.",
+    },
+    {
+      element: "#company-name",
+      intro: "Choose the background color, name and hit generate.",
+    },
+    {
+      intro: "Hope you love this tool <3 Unzet.",
     },
   ];
-
-  if (showUploadForm) {
-    steps.push(
-      {
-        element: "#package-name",
-        intro: "You can change the company name here.",
-      },
-      {
-        element: "#color-picker",
-        intro: "This is the background color for JPG and favicons.",
-      },
-      {
-        element: "#generate-button",
-        intro: "Click here to generate your logo package. Enjoy!",
-      }
-    );
-  }
 
   intro.setOptions({
     steps,
     tooltipClass: "customTooltip",
     showButtons: false,
+    overlayOpacity: 0.3,
   });
+
+  intro.onafterchange(() => {
+    const dots = document.querySelectorAll(".introjs-bullets li");
+    dots.forEach((dot) => {
+      (dot as HTMLElement).style.pointerEvents = "none";
+    });
+  });
+
+  const triggerRefreshIcon = () => {
+    const refreshIcon = document.querySelector("#refresh-icon") as HTMLElement;
+    if (refreshIcon) {
+      const event = new MouseEvent("click", {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+      });
+      refreshIcon.dispatchEvent(event);
+    }
+  };
 
   intro.oncomplete(() => {
     localStorage.setItem("tutorialSkipped", "true");
+    triggerRefreshIcon();
   });
 
   intro.onexit(() => {
     localStorage.setItem("tutorialSkipped", "true");
+    triggerRefreshIcon();
+  });
+
+  intro.onbeforechange(() => {
+    const currentStep = intro._currentStep;
+    const nextStep =
+      intro._direction === "forward" ? currentStep + 1 : currentStep - 1;
+
+    if (nextStep < currentStep) {
+      return false;
+    }
+    return true;
+  });
+
+  intro.onchange((targetElement) => {
+    if (intro._currentStep === 0) {
+      const refreshIcon = document.querySelector(
+        "#refresh-icon"
+      ) as HTMLElement;
+      if (refreshIcon) {
+        const event = new MouseEvent("click", {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+        });
+        refreshIcon.dispatchEvent(event);
+      }
+    } else if (intro._currentStep === 2) {
+      const dropZone = document.querySelector(
+        "#vertical-logo-drop-zone"
+      ) as HTMLElement;
+      if (dropZone) {
+        const event = new MouseEvent("mouseover", {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+        });
+        dropZone.dispatchEvent(event);
+      }
+    } else if (intro._currentStep === 3) {
+      const archiveRadioButton = document.querySelector(
+        "#archive-tab"
+      ) as HTMLElement;
+      if (
+        archiveRadioButton &&
+        !(archiveRadioButton as HTMLInputElement).checked
+      ) {
+        (archiveRadioButton as HTMLInputElement).click();
+        (archiveRadioButton as HTMLInputElement).blur();
+      }
+    } else if (intro._currentStep === 4) {
+      const individualTab = document.querySelector(
+        "#individual-tab"
+      ) as HTMLElement;
+      if (individualTab && !(individualTab as HTMLInputElement).checked) {
+        (individualTab as HTMLInputElement).click();
+        (individualTab as HTMLInputElement).blur();
+      }
+      const filterIcon = document.querySelector("#filter-icon") as HTMLElement;
+      if (filterIcon) {
+        const event = new MouseEvent("click", {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+        });
+        filterIcon.dispatchEvent(event);
+      }
+    } else if (intro._currentStep === 5) {
+      const trySampleButton = document.querySelector(
+        "#try-a-sample"
+      ) as HTMLElement;
+      if (trySampleButton) {
+        const event = new MouseEvent("click", {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+        });
+        trySampleButton.dispatchEvent(event);
+      }
+      const filterIcon = document.querySelector("#filter-icon") as HTMLElement;
+      if (filterIcon) {
+        const event = new MouseEvent("click", {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+        });
+        filterIcon.dispatchEvent(event);
+      }
+    }
   });
 
   intro.start();
@@ -154,6 +262,7 @@ export default function Navbar({
           <Link href="/">
             <Image
               onClick={() => setShowUploadForm(false)}
+              id="logo"
               className="w-36 h-auto transition-transform duration-500 transform hover:scale-105 cursor-pointer"
               src="/photos/logo.svg"
               alt="Unzet Logo"

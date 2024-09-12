@@ -28,12 +28,17 @@ body {
 
 .customTooltip .introjs-tooltiptext {
   color: white !important;
+  font-family: "DM Sans", sans-serif !important;
 }
 
 .introjs-arrow {
+  border-top-color: rgba(238, 255, 0, 0) !important;
   border-bottom-color: rgba(237, 255, 0, 0.2) !important;
+  border-left-color: rgba(238, 255, 0, 0) !important;
+  border-right-color: rgba(238, 255, 0, 0) !important;
 }
 
 .customTooltip .introjs-skipbutton {
   color: white !important;
+  font-family: "DM Sans", sans-serif !important;
 }

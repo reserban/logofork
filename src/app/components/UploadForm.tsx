@@ -80,6 +80,7 @@ const CustomColorPicker = ({
     <div className="relative">
       <button
         ref={buttonRef}
+        id="color-picker"
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-white bg-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-500/40"
@@ -443,6 +444,7 @@ export default function UploadForm() {
     return (
       <div
         key={type}
+        id={type === "vertical" ? "vertical-logo-drop-zone" : undefined}
         className={`relative w-full ${INDIVIDUAL_HEIGHT} border-2 ${
           isSelected
             ? "bg-primary-500/20 border-solid border-primary-500 hover:scale-102 duration-500"
@@ -557,7 +559,6 @@ export default function UploadForm() {
 
     return (
       <div
-        id="archive-option"
         className={`relative w-full ${ARCHIVE_HEIGHT} border-2 ${
           isSelected
             ? "bg-primary-500/20 border-solid border-primary-500 hover:scale-102 duration-500"
@@ -680,12 +681,15 @@ export default function UploadForm() {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      const extensionFilter = document.getElementById("extension-filter");
+      const filterIcon = document.getElementById("filter-icon");
+
       if (
         showExtensionFilter &&
-        !document
-          .getElementById("extension-filter")
-          ?.contains(event.target as Node) &&
-        !document.getElementById("filter-icon")?.contains(event.target as Node)
+        extensionFilter &&
+        !extensionFilter.contains(event.target as Node) &&
+        filterIcon &&
+        !filterIcon.contains(event.target as Node)
       ) {
         setShowExtensionFilter(false);
       }
@@ -824,12 +828,19 @@ export default function UploadForm() {
               <RadioGroup
                 value={mode}
                 onChange={setMode}
-                className="bg-secondary-400 ml-7 grid grid-cols-2 gap-x-1 rounded-bl-xl rounded-tr-xl p-1.5 text-center text-sm font-semibold mb-2 leading-5 ring-1 ring-inset ring-primary-500/30"
+                className="bg-secondary-400 ml-7 grid grid-cols-2 gap-x-1 rounded-bl-xl rounded-tr-xl p-1.5 text-center text-sm font-semibold mb-1 leading-5 ring-1 ring-inset ring-primary-500/30"
               >
                 {MODES.map((option) => (
                   <Radio
                     key={option.value}
                     value={option.value}
+                    id={
+                      option.value === "archive"
+                        ? "archive-tab"
+                        : option.value === "individual"
+                        ? "individual-tab"
+                        : undefined
+                    } // Add id for individual tab
                     className={({ checked }) =>
                       checked
                         ? "bg-primary-500 text-secondary-400 cursor-pointer rounded-bl-lg rounded-tr-lg px-2.5 py-1"
@@ -841,6 +852,7 @@ export default function UploadForm() {
                 ))}
               </RadioGroup>
               <ArrowPathIcon
+                id="refresh-icon"
                 className="ml-4 w-5 h-5 -mt-2 text-white cursor-pointer hover:text-primary-500 hover:scale-105 duration-500"
                 onClick={handleRefresh}
               />
@@ -850,6 +862,7 @@ export default function UploadForm() {
                   className="ml-3 w-5 h-5 -mt-2 text-white cursor-pointer hover:text-primary-500 hover:scale-105 duration-500"
                   onClick={handleFilterIconClick}
                 />
+
                 <AnimatePresence>
                   {showExtensionFilter && (
                     <motion.div
@@ -1156,82 +1169,87 @@ export default function UploadForm() {
                         </div>
                       </div>
                     </motion.div>
-                  )}
+                  )}{" "}
                 </AnimatePresence>
               </div>
             </fieldset>
           </div>
 
-          <motion.div
-            key={mode}
-            initial={isFirstRender ? false : { opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="w-full mt-1"
-          >
-            {mode === "individual" && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full px-2">
-                {(
-                  ["vertical", "horizontal", "logomark", "wordmark"] as const
-                ).map(renderFileInput)}
-              </div>
-            )}
-
-            {mode === "archive" && (
-              <div className="w-full px-2">{renderArchiveInput()}</div>
-            )}
-          </motion.div>
-
-          <div
-            className={`${
-              showPackageNameInput ? "opacity-100" : "opacity-0"
-            } w-full max-w-2xs mt-4 transition-opacity duration-300 ease-in-out`}
-            style={{ height: showPackageNameInput ? "auto" : "0px" }}
-          >
-            {showPackageNameInput && (
-              <motion.div
-                initial={isFirstRender ? false : { opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="flex flex-row border border-primary-500/20 rounded-tr-xl rounded-bl-xl sm:flex-row whitespace-nowrap justify-center mt-3 mb-7 gap-y-4 -mr-0  gap-x-2">
-                  <div className="flex-grow">
-                    <input
-                      type="text"
-                      id="package-name"
-                      ref={packageNameInputRef}
-                      value={packageName}
-                      onChange={handlePackageNameChange}
-                      className="w-full px-3 py-2 bg-secondary-400 rounded-bl-xl border-r border-primary-500/20  text-white focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-transparent"
-                      placeholder="Package Name"
-                    />
-                  </div>
-                  <div className="flex-shrink-0 w-full sm:w-auto">
-                    <CustomColorPicker
-                      color={selectedColor}
-                      onChange={setSelectedColor}
-                    />
-                  </div>
-                  <div className="flex-shrink-0">
-                    <button
-                      type="submit"
-                      className={`w-full sm:w-auto cursor-pointer rounded-tr-xl bg-primary-500 px-2.5 py-2.5 text-sm font-bold text-secondary-400 shadow-sm hover:bg-primary-500/5 hover:border-primary-500/60 hover:text-primary-500 border-primary-500/20 border focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 duration-500 hover:scale-102 ${
-                        !showPackageNameInput ||
-                        Object.values(files).every((file) => file === null)
-                          ? "opacity-50 cursor-not-allowed"
-                          : ""
-                      }`}
-                      disabled={
-                        !showPackageNameInput ||
-                        Object.values(files).every((file) => file === null)
-                      }
-                    >
-                      Generate
-                    </button>
-                  </div>
+          <div id="all-logos" className="w-full">
+            <motion.div
+              key={mode}
+              initial={isFirstRender ? false : { opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="w-full mt-1"
+            >
+              {mode === "individual" && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full px-2">
+                  {(
+                    ["vertical", "horizontal", "logomark", "wordmark"] as const
+                  ).map(renderFileInput)}
                 </div>
-              </motion.div>
-            )}
+              )}
+
+              {mode === "archive" && (
+                <div className="w-full px-2">{renderArchiveInput()}</div>
+              )}
+            </motion.div>
+          </div>
+
+          <div id="company-name" className="mt-6 mb-4">
+            <div
+              className={`${
+                showPackageNameInput ? "opacity-100" : "opacity-0"
+              } w-full max-w-2xs transition-opacity duration-300 ease-in-out`}
+              style={{ height: showPackageNameInput ? "auto" : "0px" }}
+            >
+              {showPackageNameInput && (
+                <motion.div
+                  initial={isFirstRender ? false : { opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="flex flex-row border border-primary-500/20 rounded-tr-xl rounded-bl-xl sm:flex-row whitespace-nowrap justify-center gap-y-4 -mr-0  gap-x-2">
+                    <div className="flex-grow">
+                      <input
+                        type="text"
+                        id="package-name"
+                        ref={packageNameInputRef}
+                        value={packageName}
+                        onChange={handlePackageNameChange}
+                        className="w-full px-3 py-2 bg-secondary-400 rounded-bl-xl border-r border-primary-500/20  text-white focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-transparent"
+                        placeholder="Package Name"
+                      />
+                    </div>
+                    <div className="flex-shrink-0 w-full sm:w-auto">
+                      <CustomColorPicker
+                        color={selectedColor}
+                        onChange={setSelectedColor}
+                      />
+                    </div>
+                    <div className="flex-shrink-0">
+                      <button
+                        type="submit"
+                        id="generate-button"
+                        className={`w-full sm:w-auto cursor-pointer rounded-tr-xl bg-primary-500 px-2.5 py-2.5 text-sm font-bold text-secondary-400 shadow-sm hover:bg-primary-500/5 hover:border-primary-500/60 hover:text-primary-500 border-primary-500/20 border focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 duration-500 hover:scale-102 ${
+                          !showPackageNameInput ||
+                          Object.values(files).every((file) => file === null)
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                        disabled={
+                          !showPackageNameInput ||
+                          Object.values(files).every((file) => file === null)
+                        }
+                      >
+                        Generate
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </div>{" "}
           </div>
 
           {!sampleLoaded && !showPackageNameInput && (
@@ -1242,7 +1260,8 @@ export default function UploadForm() {
             >
               <a
                 onClick={handleTrySample}
-                className="py-2 flex mb-8 mt-1 text-sm font-semibold leading-6 text-white transition-all duration-500 transform gap-x-0.5 hover:gap-x-1 hover:scale-105 hover:text-primary-500 cursor-pointer"
+                id="try-a-sample"
+                className="py-2 flex mb-8 -mt-4 text-sm font-semibold leading-6 text-white transition-all duration-500 transform gap-x-0.5 hover:gap-x-1 hover:scale-105 hover:text-primary-500 cursor-pointer"
               >
                 Try a Sample
                 <ChevronRightIcon className="w-4 mt-1 h-4" />
