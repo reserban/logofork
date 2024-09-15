@@ -62,7 +62,7 @@ export default function Home() {
       <div className="bg-black relative">
         <div className="fixed w-full h-full" style={{ overflow: "hidden" }}>
           <svg
-            className="absolute mt-1 stroke-primary-500/20 [mask-image:radial-gradient(52rem_32rem_at_center,white,transparent)]"
+            className="absolute mt-3 stroke-primary-500/20 [mask-image:radial-gradient(52rem_32rem_at_center,white,transparent)]"
             aria-hidden="true"
             style={{
               width: "100%",

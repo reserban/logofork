@@ -41,7 +41,7 @@ const startIntroJs = (showUploadForm: boolean) => {
   const steps = [
     {
       intro:
-        "Welcome to Logofork! Use right arrow → to learn! Skip this tutorial by pressing X.",
+        "Welcome to Logofork! Use right arrow (<b>→</b>) to learn! Skip this tutorial by pressing x (<b>esc</b>).",
     },
     {
       element: "#app-title",
