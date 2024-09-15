@@ -13,6 +13,7 @@ interface CardProps {
   className?: string;
   imageWidth: number;
   imageHeight: number;
+  priority?: boolean;
 }
 
 const Card: React.FC<CardProps> = ({
@@ -21,9 +22,10 @@ const Card: React.FC<CardProps> = ({
   className,
   imageWidth,
   imageHeight,
+  priority = false,
 }) => (
   <div
-    className={`mt-0 sm:mt-8 ring-1 ring-gray-400/10 sm:w-[33.8rem] sm:h-[16rem] w-[28rem] text-white p-6 rounded-tr-ctx rounded-bl-ctx border shadow-lg transition-transform duration-700 hover:-translate-y-1 ${className}`} // Fixed card size
+    className={`mt-0 sm:mt-8 ring-1 ring-gray-400/10 sm:w-[33.8rem] sm:h-[16rem] w-[28rem] text-white p-6 rounded-tr-ctx rounded-bl-ctx border shadow-lg transition-transform duration-700 hover:-translate-y-1 ${className}`}
   >
     <div className="flex justify-center items-center w-full h-full">
       <Image
@@ -31,6 +33,8 @@ const Card: React.FC<CardProps> = ({
         alt="Card Image"
         width={imageWidth}
         height={imageHeight}
+        priority={priority}
+        loading={priority ? "eager" : "lazy"}
         style={{ opacity, transition: "opacity 0.7s, width 0.7s, height 0.7s" }}
         className="rounded-tr-ct rounded-bl-ct"
       />
@@ -82,11 +86,12 @@ export default function How() {
               <div className="lg:pr-4">
                 <div className="w-full flex justify-center mb-8 -mt-4 sm:hidden">
                   <Card
-                    image="photos/horizontal_selected.svg"
+                    image="/photos/horizontal_selected.svg"
                     opacity={1}
                     className="border-2 border-primary-500 bg-primary-500/20"
                     imageWidth={460}
                     imageHeight={360}
+                    priority={true}
                   />
                 </div>
 
@@ -168,7 +173,7 @@ export default function How() {
                     rel="noopener noreferrer"
                     className="flex text-sm font-semibold leading-6 text-white transition-all duration-500 transform gap-x-0.5 hover:gap-x-1 hover:scale-105 hover:text-primary-500 cursor-pointer"
                   >
-                    Donate
+                    Support Us
                     <ChevronRightIcon className="w-4 mt-1 h-4" />
                   </Link>
                 </div>
@@ -177,20 +182,21 @@ export default function How() {
 
             <div
               id="sticky-card"
-              className="hidden sm:inline pt-5 mt-0 pl-12 sm:pl-5 pr-12 sm:-mt-12 -ml-12 sm:-ml-4 lg:-ml-12 lg:sticky lg:top-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:overflow-hidden transition-all duration-700" // Add transition
+              className="hidden sm:inline pt-5 mt-0 pl-12 sm:pl-5 pr-12 sm:-mt-12 -ml-12 sm:-ml-4 lg:-ml-12 lg:sticky lg:top-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:overflow-hidden transition-all duration-700"
             >
               {cardState === "default" && (
                 <Card
-                  image="photos/horizontal.svg"
+                  image="/photos/horizontal.svg"
                   opacity={0.5}
                   className="border-2 border-dashed border-primary-500/40 bg-black/60"
                   imageWidth={380}
                   imageHeight={280}
+                  priority={true}
                 />
               )}
               {cardState === "how1" && (
                 <Card
-                  image="photos/horizontal_hover.svg"
+                  image="/photos/horizontal_hover.svg"
                   opacity={1}
                   className="border-2 border-primary-500/40 bg-primary-500/10"
                   imageWidth={540}
@@ -199,7 +205,7 @@ export default function How() {
               )}
               {cardState === "how2" && (
                 <Card
-                  image="photos/horizontal_selected.svg"
+                  image="/photos/horizontal_selected.svg"
                   opacity={1}
                   className="border-2 border-primary-500 bg-primary-500/20"
                   imageWidth={460}

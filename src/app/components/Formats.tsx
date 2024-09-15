@@ -18,7 +18,6 @@ const initialItems: Item[] = [
   { bigText: "master.svg", checked: true },
   { bigText: "_black", checked: true },
   { bigText: "favicons", checked: true },
-  { bigText: "guides.pdf", checked: true },
 ];
 
 const shuffleArray = (array: Item[]) => {
@@ -47,7 +46,7 @@ export default function Formats() {
     let currentPosition = -totalWidth;
 
     const animate = () => {
-      currentPosition += 0.9;
+      currentPosition += 0.7;
       if (currentPosition >= 0) {
         currentPosition = -totalWidth;
       }
@@ -100,7 +99,7 @@ export default function Formats() {
     <section id="formats" className="relative">
       <div className="mx-auto overflow-hidden py-24 pb-0 sm:pt-12 pt-16">
         <div className="relative mx-auto max-w-7xl px-7 lg:px-8 pb-12 flex">
-          <div className="w-2/3 h-24 bg-primary-500/10 border border-primary-500/20 hidden lg:flex rounded-bl-ct items-center justify-center">
+          <div className="w-2/3 h-24 hover:-translate-x-1 duration-500 bg-primary-500/10 border border-primary-500/20 hidden lg:flex rounded-bl-ct items-center justify-center">
             <Image
               className="opacity-90"
               src="photos/svg.svg"
@@ -118,7 +117,7 @@ export default function Formats() {
               {renderItems()}
             </div>
           </div>
-          <div className="w-2/3 h-24 bg-primary-500/10 border border-primary-500/20 hidden lg:flex rounded-tr-ct items-center justify-center">
+          <div className="w-2/3 h-24 hover:translate-x-1 duration-500 bg-primary-500/10 border border-primary-500/20 hidden lg:flex rounded-tr-ct items-center justify-center">
             <Image
               className="opacity-90"
               src="photos/zip_h.svg"

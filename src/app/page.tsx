@@ -70,7 +70,7 @@ export default function Home() {
               left: "50%",
               top: "50%",
               transform: "translate(-50%, -50%)",
-              minWidth: "8124px",
+              minWidth: "8120px",
               minHeight: "100%",
             }}
           >

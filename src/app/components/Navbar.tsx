@@ -40,9 +40,17 @@ const startIntroJs = (showUploadForm: boolean) => {
   const intro = introJs();
   const steps = [
     {
-      element: "#tutorial-start",
       intro:
         "Welcome to Logofork! Use right arrow → to learn! Skip this tutorial by pressing X.",
+    },
+    {
+      element: "#app-title",
+      intro:
+        "1. Upload one or more logo types. <br> 2. Select which files you need. <br> 3. Add name, background color. <br> 4. Package ready with all file types!",
+    },
+    {
+      element: "#tutorial-start",
+      intro: "At anytime, restart the tutorial from here.",
     },
     {
       element: "#logo",
@@ -50,7 +58,7 @@ const startIntroJs = (showUploadForm: boolean) => {
     },
     {
       element: "#vertical-logo-drop-zone",
-      intro: "Drag and drop, upload or paste the logos you need.",
+      intro: "Drag and drop, upload or paste one or more logos.",
     },
     {
       element: "#all-logos",
@@ -69,6 +77,7 @@ const startIntroJs = (showUploadForm: boolean) => {
       intro: "...choose the background color, name and hit generate!",
     },
     {
+      element: "#tutorial-start",
       intro: "Hope you love <3 this tool ~ Unzet.",
     },
   ];
@@ -121,7 +130,7 @@ const startIntroJs = (showUploadForm: boolean) => {
   });
 
   intro.onchange((targetElement) => {
-    if (intro._currentStep === 0) {
+    if (intro._currentStep === 3) {
       const refreshIcon = document.querySelector(
         "#refresh-icon"
       ) as HTMLElement;
@@ -133,7 +142,7 @@ const startIntroJs = (showUploadForm: boolean) => {
         });
         refreshIcon.dispatchEvent(event);
       }
-    } else if (intro._currentStep === 2) {
+    } else if (intro._currentStep === 4) {
       const dropZone = document.querySelector(
         "#vertical-logo-drop-zone"
       ) as HTMLElement;
@@ -145,7 +154,7 @@ const startIntroJs = (showUploadForm: boolean) => {
         });
         dropZone.dispatchEvent(event);
       }
-    } else if (intro._currentStep === 3) {
+    } else if (intro._currentStep === 5) {
       const archiveRadioButton = document.querySelector(
         "#archive-tab"
       ) as HTMLElement;
@@ -156,7 +165,7 @@ const startIntroJs = (showUploadForm: boolean) => {
         (archiveRadioButton as HTMLInputElement).click();
         (archiveRadioButton as HTMLInputElement).blur();
       }
-    } else if (intro._currentStep === 4) {
+    } else if (intro._currentStep === 6) {
       const individualTab = document.querySelector(
         "#individual-tab"
       ) as HTMLElement;
@@ -173,7 +182,7 @@ const startIntroJs = (showUploadForm: boolean) => {
         });
         filterIcon.dispatchEvent(event);
       }
-    } else if (intro._currentStep === 5) {
+    } else if (intro._currentStep === 7) {
       const trySampleButton = document.querySelector(
         "#try-a-sample"
       ) as HTMLElement;
@@ -292,10 +301,12 @@ export default function Navbar({
             />
           </Link>
         </div>
-        <div className="hidden lg:flex lg:flex-1 lg:justify-center lg:items-center">
-          <span className="text-white/60 mt-1 text-sm">
-            Logofork Public Beta v2.0.1
-          </span>
+        <div className="hidden lg:flex lg:flex-1 lg:justify-center lg:items-center transform z-50">
+          {!showUploadForm && (
+            <span className="text-white/60 mt-1.5 text-sm">
+              Logofork Public Beta v2.0.1
+            </span>
+          )}
         </div>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center lg:gap-3 ">
           <AnimatePresence>

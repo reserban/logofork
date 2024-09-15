@@ -147,6 +147,9 @@ export default function UploadForm() {
   const [sampleLoaded, setSampleLoaded] = useState<boolean>(false);
   const [packageName, setPackageName] = useState<string>("");
   const [status, setStatus] = useState<string>("");
+  const [idleStatus, setIdleStatus] = useState<string>(
+    "Logofork Public Beta v2.0.1"
+  );
   const [dragging, setDragging] = useState<string | null>(null);
   const [disabledFields, setDisabledFields] = useState<string[]>([]);
   const [mode, setMode] = useState("individual");
@@ -172,6 +175,14 @@ export default function UploadForm() {
   const [pasteModalType, setPasteModalType] = useState<
     FileInputType | "archive" | null
   >(null);
+  const [isDownloading, setIsDownloading] = useState<boolean>(false);
+  const [allFilesDeselected, setAllFilesDeselected] = useState(true);
+
+  // Add new state for upload reminder
+  const [showUploadReminder, setShowUploadReminder] = useState<boolean>(false);
+
+  // Add this new state variable at the beginning of your component
+  const [isFirstUpload, setIsFirstUpload] = useState(true);
 
   const fileInputRefs: Record<FileInputType, RefObject<HTMLInputElement>> = {
     vertical: useRef<HTMLInputElement>(null),
@@ -194,6 +205,12 @@ export default function UploadForm() {
     setHoveredType(null);
   }, [mode]);
 
+  useEffect(() => {
+    const hasFiles = Object.values(files).some((file) => file !== null);
+    setAllFilesDeselected(!hasFiles);
+    setShowPackageNameInput(hasFiles);
+  }, [files]);
+
   const handleColorChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSelectedColor(event.target.value);
   };
@@ -204,22 +221,42 @@ export default function UploadForm() {
   ) => {
     if (event.target.files && event.target.files[0]) {
       const selectedFile = event.target.files[0];
+      console.log(
+        "File selected:",
+        selectedFile.name,
+        "Type:",
+        type,
+        "Mode:",
+        mode
+      );
 
       if (mode === "archive") {
+        if (selectedFile.type !== "application/zip") {
+          setStatus("Please use a ZIP file for archive upload");
+          return;
+        }
+        // Set status to "Archive uploaded" for manual file selection
+        setStatus("Archive uploaded");
         await handleArchiveFile(selectedFile);
       } else if (mode === "individual") {
+        if (!selectedFile.name.endsWith(".svg")) {
+          setStatus("Please use SVG files for individual uploads");
+          return;
+        }
         handleIndividualFile(selectedFile, type as FileInputType);
+        setStatus(`${type.charAt(0).toUpperCase() + type.slice(1)} Uploaded`);
       }
 
       setShowPackageNameInput(true);
-      setStatus(`File uploaded successfully`);
     }
   };
 
   const handleArchiveFile = async (file: File) => {
+    console.log("handleArchiveFile called with file:", file.name);
     try {
       const zip = new JSZip();
       const loadedZip = await zip.loadAsync(file);
+      console.log("ZIP file loaded");
       const requiredFiles = [
         "vertical.svg",
         "horizontal.svg",
@@ -233,17 +270,14 @@ export default function UploadForm() {
         wordmark: null,
       };
 
-      const missingFiles = requiredFiles.filter(
-        (fileName) => !loadedZip.file(fileName)
-      );
-      if (missingFiles.length === requiredFiles.length) {
-        setStatus(`Files not in ZIP root: ${missingFiles.join(", ")}`);
-        setShowPackageNameInput(false);
-        return;
-      }
+      let foundFileNames: string[] = [];
 
       for (const fileName of requiredFiles) {
         const fileData = loadedZip.file(fileName);
+        console.log(
+          `Checking for ${fileName}:`,
+          fileData ? "found" : "not found"
+        );
         if (fileData) {
           const fileBlob = await fileData.async("blob");
           foundFiles[fileName.replace(".svg", "") as FileInputType] = new File(
@@ -251,16 +285,50 @@ export default function UploadForm() {
             `${fileName} (archive)`,
             { type: "image/svg+xml" }
           );
+          foundFileNames.push(fileName.replace(".svg", ""));
         }
+      }
+
+      console.log("Found files:", foundFileNames);
+
+      if (foundFileNames.length === 0) {
+        console.log("No required files found");
+        setStatus("Archive uploaded: no required files");
+        setFiles({
+          vertical: null,
+          horizontal: null,
+          logomark: null,
+          wordmark: null,
+        });
+        setShowPackageNameInput(false);
+        return;
       }
 
       setFiles((prevFiles) => ({ ...prevFiles, ...foundFiles }));
       setPackageName(file.name.replace(/\.[^/.]+$/, ""));
-      setStatus("Files matched and loaded");
+
+      let statusMessage = "Archive uploaded: ";
+      if (foundFileNames.length === requiredFiles.length) {
+        statusMessage += "all types";
+      } else {
+        statusMessage += foundFileNames.join(", ");
+      }
+      console.log("Setting status:", statusMessage);
+      setStatus(statusMessage);
+
       setShowPackageNameInput(true);
     } catch (error) {
       console.error("Error processing ZIP file:", error);
-      setStatus("Error processing ZIP file");
+      setStatus(
+        "Error processing ZIP file. Please ensure it's a valid archive."
+      );
+      setFiles({
+        vertical: null,
+        horizontal: null,
+        logomark: null,
+        wordmark: null,
+      });
+      setShowPackageNameInput(false);
     }
   };
 
@@ -291,6 +359,18 @@ export default function UploadForm() {
     setDragging(null);
     if (event.dataTransfer.files && event.dataTransfer.files[0]) {
       const selectedFile = event.dataTransfer.files[0];
+
+      if (mode === "archive" && selectedFile.type !== "application/zip") {
+        setStatus("Please use a ZIP file for archive upload");
+        return;
+      }
+
+      if (mode === "individual" && !selectedFile.name.endsWith(".svg")) {
+        setStatus("Please use SVG files for individual uploads");
+        return;
+      }
+
+      // Process the file
       handleFileChange(
         {
           target: { files: [selectedFile] },
@@ -298,7 +378,6 @@ export default function UploadForm() {
         } as unknown as ChangeEvent<HTMLInputElement>,
         type
       );
-      setStatus(`File dropped successfully`);
     }
   };
 
@@ -308,11 +387,13 @@ export default function UploadForm() {
 
     if (Object.values(files).every((file) => file === null)) {
       console.log("No files selected");
+      setStatus("Please upload at least one logo before generating");
       return;
     }
 
     setStatus("Generating logo package...");
     setIsGenerating(true);
+    setIsDownloading(true);
 
     const formData = new FormData();
     Object.entries(files).forEach(([key, file]) => {
@@ -333,6 +414,8 @@ export default function UploadForm() {
       if (!response.ok)
         throw new Error(`HTTP error! status: ${response.status}`);
 
+      setStatus("Downloading logo package...");
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
 
@@ -346,7 +429,12 @@ export default function UploadForm() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
+      setIsGenerating(false);
       setStatus("Logo package downloaded!");
+      setTimeout(() => {
+        setIsDownloading(false);
+        setStatus("");
+      }, 3000);
     } catch (error) {
       console.error("Error during logo package generation:", error);
       setStatus(
@@ -354,7 +442,7 @@ export default function UploadForm() {
           error instanceof Error ? error.message : "An unknown error occurred"
         }`
       );
-    } finally {
+      setIsDownloading(false);
       setIsGenerating(false);
     }
   };
@@ -391,7 +479,7 @@ export default function UploadForm() {
 
       setFiles(fileMap);
       setPackageName("unzet");
-      setStatus("Sample Loaded - Press Generate");
+      setStatus("Sample Loaded");
       setShowPackageNameInput(true);
       setSampleLoaded(true);
     } catch (error) {
@@ -418,13 +506,25 @@ export default function UploadForm() {
   };
 
   useEffect(() => {
-    if (status && !isGenerating) {
+    if (isFirstRender) {
+      setStatus("Welcome Superhuman");
+      const timer = setTimeout(() => {
+        setStatus("");
+        setIsFirstRender(false);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isFirstRender]);
+
+  useEffect(() => {
+    if (status && !isFirstRender) {
       const timer = setTimeout(() => {
         setStatus("");
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [status, isGenerating]);
+  }, [status, isFirstRender]);
 
   const renderFileInput = (type: FileInputType) => {
     const isSelected = !!files[type];
@@ -555,6 +655,7 @@ export default function UploadForm() {
         wordmark: null,
       });
       setStatus("Archive cleared");
+      setShowPackageNameInput(false);
     };
 
     return (
@@ -679,6 +780,34 @@ export default function UploadForm() {
     setShowExtensionFilter((prev) => !prev);
   };
 
+  // Add new functions for check all and uncheck all
+  const handleCheckAll = () => {
+    setSelectedExtensions([
+      "svg",
+      "eps",
+      "afdesign",
+      "ai",
+      "png",
+      "jpg",
+      "webp",
+      "tiff",
+      "color",
+      "black",
+      "white",
+      "master",
+      "favicons",
+      "motion",
+      "formats",
+      "structure",
+    ]);
+    setStatus("All options selected");
+  };
+
+  const handleUncheckAll = () => {
+    setSelectedExtensions(["svg", "color"]);
+    setStatus("All options unselected");
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const extensionFilter = document.getElementById("extension-filter");
@@ -719,7 +848,11 @@ export default function UploadForm() {
         }
 
         setShowPackageNameInput(true);
-        setStatus(`Logo pasted successfully`);
+        setStatus(
+          `${
+            pasteModalType.charAt(0).toUpperCase() + pasteModalType.slice(1)
+          } Pasted`
+        );
       } else {
         setStatus("Pasted content is not a valid SVG.");
       }
@@ -803,503 +936,516 @@ export default function UploadForm() {
   };
 
   return (
-    <section className="max-w-4xl mx-auto px-4 pt-8 sm:pt-0 text-center">
-      <span className=" sm:hidden text-center text-white font-semibold text-4xl sm:px-0">
-        <ComputerDesktopIcon className="h-20 w-20 text-primary-500 mt-40 mx-auto mb-4" />
-        Logofork is only<br></br> available{" "}
-        <span className="text-primary-500">on desktop.</span>
-      </span>
-
-      <div className="hidden sm:inline">
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col items-center justify-center gap-2 no-select"
-        >
-          <PasteModal />
-          <h1 className="text-4xl max-w-md text-center mb-6 mt-4 align center font-bold tracking-tight text-white sm:text-6xl">
-            <span>
-              Pack Your Logos{" "}
-              <span className="text-primary-500">In Seconds</span>
+    <>
+      <div className="fixed top-7 left-1/2 transform -translate-x-1/2 z-50">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={status || idleStatus}
+            initial={
+              isFirstRender ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }
+            }
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: isFirstRender ? 0 : 0.3 }}
+            className={`hidden md:flex text-white text-sm px-4 py-2 rounded-ct shadow-lg justify-center items-center gap-2 ${
+              status
+                ? "bg-secondary-400 border border-primary-500/20"
+                : "bg-transparent"
+            }`}
+            style={{
+              minHeight: "40px",
+              width: "fit-content",
+              padding: "0 16px",
+            }}
+          >
+            {(isGenerating ||
+              (isDownloading && status !== "Logo package downloaded!")) && (
+              <ArrowPathIcon className="h-5 w-5 animate-spin text-primary-500" />
+            )}
+            <span className={status ? "" : "text-white/60"}>
+              {status ||
+                (isDownloading ? "Downloading logo package..." : idleStatus)}
             </span>
-          </h1>
-          <div className="flex justify-center">
-            <fieldset
-              aria-label="Project type"
-              className="flex items-center ml-10 mb-4"
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      <AnimatePresence>
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.5 }}
+          className="max-w-4xl mx-auto px-4 pt-8 sm:pt-0 text-center"
+        >
+          <span className=" md:hidden text-center text-white font-semibold text-4xl sm:px-0">
+            <ComputerDesktopIcon className="h-20 w-20 text-primary-500 mt-40 mx-auto mb-4" />
+            Logofork is only<br></br> available{" "}
+            <span className="text-primary-500">on desktop.</span>
+          </span>
+
+          <div className="hidden md:inline">
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-col items-center justify-center gap-2 no-select"
             >
-              <RadioGroup
-                value={mode}
-                onChange={setMode}
-                className="bg-secondary-400 ml-7 grid grid-cols-2 gap-x-1 rounded-bl-xl rounded-tr-xl p-1.5 text-center text-sm font-semibold mb-1 leading-5 ring-1 ring-inset ring-primary-500/30"
+              <PasteModal />
+              <h1
+                id="app-title"
+                className="text-4xl max-w-md text-center mb-6 mt-4 align center font-bold tracking-tight text-white sm:text-6xl"
               >
-                {MODES.map((option) => (
-                  <Radio
-                    key={option.value}
-                    value={option.value}
-                    id={
-                      option.value === "archive"
-                        ? "archive-tab"
-                        : option.value === "individual"
-                        ? "individual-tab"
-                        : undefined
-                    } // Add id for individual tab
-                    className={({ checked }) =>
-                      checked
-                        ? "bg-primary-500 text-secondary-400 cursor-pointer rounded-bl-lg rounded-tr-lg px-2.5 py-1"
-                        : "text-white cursor-pointer rounded-bl-lg rounded-tr-lg px-2.5 py-1 hover:text-primary-500 hover:scale-95 duration-500"
-                    }
+                <span>
+                  Pack Your Logos{" "}
+                  <span className="text-primary-500">In Seconds</span>
+                </span>
+              </h1>
+              <div className="flex justify-center">
+                <fieldset
+                  aria-label="Project type"
+                  className="flex items-center ml-10 mb-4"
+                >
+                  <RadioGroup
+                    value={mode}
+                    onChange={setMode}
+                    className="bg-secondary-400 ml-7 grid grid-cols-2 gap-x-1 rounded-tr-xl rounded-bl-xl p-1.5 text-center text-sm font-semibold mb-2 leading-5 ring-1 ring-inset ring-primary-500/30"
                   >
-                    {option.label}
-                  </Radio>
-                ))}
-              </RadioGroup>
-              <ArrowPathIcon
-                id="refresh-icon"
-                className="ml-4 w-5 h-5 -mt-2 text-white cursor-pointer hover:text-primary-500 hover:scale-105 duration-500"
-                onClick={handleRefresh}
-              />
-              <div className="relative">
-                <FunnelIcon
-                  id="filter-icon"
-                  className="ml-3 w-5 h-5 -mt-2 text-white cursor-pointer hover:text-primary-500 hover:scale-105 duration-500"
-                  onClick={handleFilterIconClick}
-                />
+                    {MODES.map((option) => (
+                      <Radio
+                        key={option.value}
+                        value={option.value}
+                        id={
+                          option.value === "archive"
+                            ? "archive-tab"
+                            : option.value === "individual"
+                            ? "individual-tab"
+                            : undefined
+                        }
+                        className={({ checked }) =>
+                          checked
+                            ? "bg-primary-500 text-secondary-400 cursor-pointer rounded-tr-lg rounded-bl-lg px-2.5 py-1"
+                            : "text-white cursor-pointer rounded-sm px-2.5 py-1 hover:text-primary-500 hover:scale-95 duration-200"
+                        }
+                      >
+                        {option.label}
+                      </Radio>
+                    ))}
+                  </RadioGroup>
+                  <ArrowPathIcon
+                    id="refresh-icon"
+                    className="ml-4 w-5 h-5 -mt-2 text-white cursor-pointer hover:text-primary-500 hover:scale-105 duration-500"
+                    onClick={handleRefresh}
+                  />
+                  <div className="relative">
+                    <FunnelIcon
+                      id="filter-icon"
+                      className="ml-3 w-5 h-5 -mt-2 text-white cursor-pointer hover:text-primary-500 hover:scale-105 duration-500"
+                      onClick={handleFilterIconClick}
+                    />
 
-                <AnimatePresence>
-                  {showExtensionFilter && (
-                    <motion.div
-                      id="extension-filter"
-                      className="absolute right-0 mt-5 w-72  bg-secondary-400 py-4 pl-4 px-4 rounded-tl-3xl rounded-br-3xl border-primary-500/20 shadow-lg z-10 border"
-                      onClick={(e) => e.stopPropagation()}
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <div className="ml-3 grid grid-cols-2 gap-4">
-                        <div>
-                          <h3 className="text-white text-lg mb-1 text-left">
-                            Vector
-                          </h3>
-                          {["svg", "eps", "afdesign", "ai"].map((ext) => (
-                            <div key={ext} className="flex items-center mb-2">
-                              <input
-                                type="checkbox"
-                                id={`checkbox-${ext}`}
-                                checked={selectedExtensions.includes(ext)}
-                                onChange={(e) => {
-                                  e.stopPropagation();
-                                  if (ext !== "svg") {
-                                    setSelectedExtensions((prev) =>
-                                      prev.includes(ext)
-                                        ? prev.filter((e) => e !== ext)
-                                        : [...prev, ext]
-                                    );
-                                  }
-                                }}
-                                className="hidden"
-                              />
-                              <label
-                                htmlFor={`checkbox-${ext}`}
-                                className="flex items-center cursor-pointer"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <span
-                                  className={`w-5 h-5 inline-block mr-2 rounded border ${
-                                    selectedExtensions.includes(ext)
-                                      ? ext === "svg"
-                                        ? "bg-primary-700 border-primary-700"
-                                        : "bg-primary-500 border-primary-500"
-                                      : "bg-secondary-400 border-primary-500/20"
-                                  }`}
-                                  style={{ borderWidth: "1px" }}
+                    <AnimatePresence>
+                      {showExtensionFilter && (
+                        <motion.div
+                          id="extension-filter"
+                          className="absolute right-0 mt-5 w-72  bg-secondary-400 py-4 pl-4 px-4 rounded-tl-3xl rounded-br-3xl border-primary-500/20 shadow-lg z-10 border"
+                          onClick={(e) => e.stopPropagation()}
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <div className="ml-3 grid grid-cols-2 gap-4">
+                            <div>
+                              <h3 className="text-white text-lg mb-1 text-left">
+                                Vector
+                              </h3>
+                              {["svg", "eps", "afdesign", "ai"].map((ext) => (
+                                <div
+                                  key={ext}
+                                  className="flex items-center mb-2"
                                 >
-                                  {selectedExtensions.includes(ext) && (
-                                    <svg
-                                      className="w-4 h-4 text-secondary-400"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      style={{ margin: "auto" }}
+                                  <input
+                                    type="checkbox"
+                                    id={`checkbox-${ext}`}
+                                    checked={selectedExtensions.includes(ext)}
+                                    onChange={(e) => {
+                                      e.stopPropagation();
+                                      if (ext !== "svg") {
+                                        setSelectedExtensions((prev) =>
+                                          prev.includes(ext)
+                                            ? prev.filter((e) => e !== ext)
+                                            : [...prev, ext]
+                                        );
+                                      }
+                                    }}
+                                    className="hidden"
+                                  />
+                                  <label
+                                    htmlFor={`checkbox-${ext}`}
+                                    className="flex items-center cursor-pointer"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <span
+                                      className={`w-5 h-5 inline-block mr-2 rounded border ${
+                                        selectedExtensions.includes(ext)
+                                          ? ext === "svg"
+                                            ? "bg-primary-700 border-primary-700"
+                                            : "bg-primary-500 border-primary-500"
+                                          : "bg-secondary-400 border-primary-500/20"
+                                      }`}
+                                      style={{ borderWidth: "1px" }}
                                     >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M5 13l4 4L19 7"
-                                      ></path>
-                                    </svg>
-                                  )}
-                                </span>
-                                <span className="text-white">
-                                  {ext.toUpperCase()}
-                                </span>
-                              </label>
-                            </div>
-                          ))}
-                          <h3 className="text-white text-lg mb-2 mt-4 text-left">
-                            Raster
-                          </h3>
-                          {["png", "jpg", "webp", "tiff"].map((ext) => (
-                            <div key={ext} className="flex items-center mb-2">
-                              <input
-                                type="checkbox"
-                                id={`checkbox-${ext}`}
-                                checked={selectedExtensions.includes(ext)}
-                                onChange={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedExtensions((prev) =>
-                                    prev.includes(ext)
-                                      ? prev.filter((e) => e !== ext)
-                                      : [...prev, ext]
-                                  );
-                                }}
-                                className="hidden"
-                              />
-                              <label
-                                htmlFor={`checkbox-${ext}`}
-                                className="flex items-center cursor-pointer"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <span
-                                  className={`w-5 h-5 inline-block mr-2 rounded border ${
-                                    selectedExtensions.includes(ext)
-                                      ? "bg-primary-500 border-primary-500"
-                                      : "bg-secondary-400 border-primary-500/20"
-                                  }`}
-                                  style={{ borderWidth: "1px" }}
+                                      {selectedExtensions.includes(ext) && (
+                                        <svg
+                                          className="w-4 h-4 text-secondary-400"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          viewBox="0 0 24 24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          style={{ margin: "auto" }}
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M5 13l4 4L19 7"
+                                          ></path>
+                                        </svg>
+                                      )}
+                                    </span>
+                                    <span className="text-white">
+                                      {ext.toUpperCase()}
+                                    </span>
+                                  </label>
+                                </div>
+                              ))}
+                              <h3 className="text-white text-lg mb-2 mt-4 text-left">
+                                Raster
+                              </h3>
+                              {["png", "jpg", "webp", "tiff"].map((ext) => (
+                                <div
+                                  key={ext}
+                                  className="flex items-center mb-2"
                                 >
-                                  {selectedExtensions.includes(ext) && (
-                                    <svg
-                                      className="w-4 h-4 text-secondary-400"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      style={{ margin: "auto" }}
+                                  <input
+                                    type="checkbox"
+                                    id={`checkbox-${ext}`}
+                                    checked={selectedExtensions.includes(ext)}
+                                    onChange={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedExtensions((prev) =>
+                                        prev.includes(ext)
+                                          ? prev.filter((e) => e !== ext)
+                                          : [...prev, ext]
+                                      );
+                                    }}
+                                    className="hidden"
+                                  />
+                                  <label
+                                    htmlFor={`checkbox-${ext}`}
+                                    className="flex items-center cursor-pointer"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <span
+                                      className={`w-5 h-5 inline-block mr-2 rounded border ${
+                                        selectedExtensions.includes(ext)
+                                          ? "bg-primary-500 border-primary-500"
+                                          : "bg-secondary-400 border-primary-500/20"
+                                      }`}
+                                      style={{ borderWidth: "1px" }}
                                     >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M5 13l4 4L19 7"
-                                      ></path>
-                                    </svg>
-                                  )}
-                                </span>
-                                <span className="text-white">
-                                  {ext.toUpperCase()}
-                                </span>
-                              </label>
+                                      {selectedExtensions.includes(ext) && (
+                                        <svg
+                                          className="w-4 h-4 text-secondary-400"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          viewBox="0 0 24 24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          style={{ margin: "auto" }}
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M5 13l4 4L19 7"
+                                          ></path>
+                                        </svg>
+                                      )}
+                                    </span>
+                                    <span className="text-white">
+                                      {ext.toUpperCase()}
+                                    </span>
+                                  </label>
+                                </div>
+                              ))}
                             </div>
-                          ))}
-                        </div>
-                        <div>
-                          <h3 className="text-white text-lg mb-2 text-left">
-                            Colors
-                          </h3>
-                          {["Color", "Black", "White"].map((color) => (
-                            <div key={color} className="flex items-center mb-2">
-                              <input
-                                type="checkbox"
-                                id={`checkbox-${color}`}
-                                checked={selectedExtensions.includes(
-                                  color.toLowerCase()
-                                )}
-                                onChange={(e) => {
-                                  e.stopPropagation();
-                                  if (color !== "Color") {
-                                    setSelectedExtensions((prev) =>
-                                      prev.includes(color.toLowerCase())
-                                        ? prev.filter(
-                                            (e) => e !== color.toLowerCase()
-                                          )
-                                        : [...prev, color.toLowerCase()]
-                                    );
-                                  }
-                                }}
-                                className="hidden"
-                              />
-                              <label
-                                htmlFor={`checkbox-${color}`}
-                                className="flex items-center cursor-pointer"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <span
-                                  className={`w-5 h-5 inline-block mr-2 rounded border ${
-                                    selectedExtensions.includes(
+                            <div>
+                              <h3 className="text-white text-lg mb-2 text-left">
+                                Colors
+                              </h3>
+                              {["Color", "Black", "White"].map((color) => (
+                                <div
+                                  key={color}
+                                  className="flex items-center mb-2"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    id={`checkbox-${color}`}
+                                    checked={selectedExtensions.includes(
                                       color.toLowerCase()
-                                    )
-                                      ? color === "Color"
-                                        ? "bg-primary-700 border-primary-700"
-                                        : "bg-primary-500 border-primary-500"
-                                      : "bg-secondary-400 border-primary-500/20"
-                                  }`}
-                                  style={{ borderWidth: "1px" }}
-                                >
-                                  {selectedExtensions.includes(
-                                    color.toLowerCase()
-                                  ) && (
-                                    <svg
-                                      className="w-4 h-4 text-secondary-400"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      style={{ margin: "auto" }}
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M5 13l4 4L19 7"
-                                      ></path>
-                                    </svg>
-                                  )}
-                                </span>
-                                <span className="text-white">{color}</span>
-                              </label>
-                            </div>
-                          ))}
-                          <h3 className="text-white text-lg mb-2 mt-4 text-left">
-                            Extras
-                          </h3>
-                          {[
-                            "Master",
-                            "Favicons",
-                            "Motion",
-                            "Formats",
-                            "Structure",
-                          ].map((extra) => (
-                            <div key={extra} className="flex items-center mb-2">
-                              <input
-                                type="checkbox"
-                                id={`checkbox-${extra}`}
-                                checked={selectedExtensions.includes(
-                                  extra.toLowerCase()
-                                )}
-                                onChange={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedExtensions((prev) =>
-                                    prev.includes(extra.toLowerCase())
-                                      ? prev.filter(
-                                          (e) => e !== extra.toLowerCase()
+                                    )}
+                                    onChange={(e) => {
+                                      e.stopPropagation();
+                                      if (color !== "Color") {
+                                        setSelectedExtensions((prev) =>
+                                          prev.includes(color.toLowerCase())
+                                            ? prev.filter(
+                                                (e) => e !== color.toLowerCase()
+                                              )
+                                            : [...prev, color.toLowerCase()]
+                                        );
+                                      }
+                                    }}
+                                    className="hidden"
+                                  />
+                                  <label
+                                    htmlFor={`checkbox-${color}`}
+                                    className="flex items-center cursor-pointer"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <span
+                                      className={`w-5 h-5 inline-block mr-2 rounded border ${
+                                        selectedExtensions.includes(
+                                          color.toLowerCase()
                                         )
-                                      : [...prev, extra.toLowerCase()]
-                                  );
-                                }}
-                                className="hidden"
-                              />
-                              <label
-                                htmlFor={`checkbox-${extra}`}
-                                className="flex items-center cursor-pointer"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <span
-                                  className={`w-5 h-5 inline-block mr-2 rounded border ${
-                                    selectedExtensions.includes(
-                                      extra.toLowerCase()
-                                    )
-                                      ? "bg-primary-500 border-primary-500"
-                                      : "bg-secondary-400 border-primary-500/20"
-                                  }`}
-                                  style={{ borderWidth: "1px" }}
-                                >
-                                  {selectedExtensions.includes(
-                                    extra.toLowerCase()
-                                  ) && (
-                                    <svg
-                                      className="w-4 h-4 text-secondary-400"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      style={{ margin: "auto" }}
+                                          ? color === "Color"
+                                            ? "bg-primary-700 border-primary-700"
+                                            : "bg-primary-500 border-primary-500"
+                                          : "bg-secondary-400 border-primary-500/20"
+                                      }`}
+                                      style={{ borderWidth: "1px" }}
                                     >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M5 13l4 4L19 7"
-                                      ></path>
-                                    </svg>
-                                  )}
-                                </span>
-                                <span className="text-white">{extra}</span>
-                              </label>
+                                      {selectedExtensions.includes(
+                                        color.toLowerCase()
+                                      ) && (
+                                        <svg
+                                          className="w-4 h-4 text-secondary-400"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          viewBox="0 0 24 24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          style={{ margin: "auto" }}
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M5 13l4 4L19 7"
+                                          ></path>
+                                        </svg>
+                                      )}
+                                    </span>
+                                    <span className="text-white">{color}</span>
+                                  </label>
+                                </div>
+                              ))}
+                              <h3 className="text-white text-lg mb-2 mt-4 text-left">
+                                Extras
+                              </h3>
+                              {[
+                                "Master",
+                                "Favicons",
+                                "Motion",
+                                "Formats",
+                                "Structure",
+                              ].map((extra) => (
+                                <div
+                                  key={extra}
+                                  className="flex items-center mb-2"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    id={`checkbox-${extra}`}
+                                    checked={selectedExtensions.includes(
+                                      extra.toLowerCase()
+                                    )}
+                                    onChange={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedExtensions((prev) =>
+                                        prev.includes(extra.toLowerCase())
+                                          ? prev.filter(
+                                              (e) => e !== extra.toLowerCase()
+                                            )
+                                          : [...prev, extra.toLowerCase()]
+                                      );
+                                    }}
+                                    className="hidden"
+                                  />
+                                  <label
+                                    htmlFor={`checkbox-${extra}`}
+                                    className="flex items-center cursor-pointer"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <span
+                                      className={`w-5 h-5 inline-block mr-2 rounded border ${
+                                        selectedExtensions.includes(
+                                          extra.toLowerCase()
+                                        )
+                                          ? "bg-primary-500 border-primary-500"
+                                          : "bg-secondary-400 border-primary-500/20"
+                                      }`}
+                                      style={{ borderWidth: "1px" }}
+                                    >
+                                      {selectedExtensions.includes(
+                                        extra.toLowerCase()
+                                      ) && (
+                                        <svg
+                                          className="w-4 h-4 text-secondary-400"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          viewBox="0 0 24 24"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          style={{ margin: "auto" }}
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M5 13l4 4L19 7"
+                                          ></path>
+                                        </svg>
+                                      )}
+                                    </span>
+                                    <span className="text-white">{extra}</span>
+                                  </label>
+                                </div>
+                              ))}
                             </div>
-                          ))}
-                        </div>
-                        <div className="col-span-2 flex gap-x-12">
-                          <a
-                            className="flex -mt-3 text-sm font-semibold leading-6 text-white transition-all duration-500 transform gap-x-0.5 hover:gap-x-1 hover:scale-105 hover:text-primary-500 cursor-pointer"
-                            onClick={() =>
-                              setSelectedExtensions([
-                                "svg",
-                                "eps",
-                                "afdesign",
-                                "ai",
-                                "png",
-                                "jpg",
-                                "webp",
-                                "tiff",
-                                "color",
-                                "black",
-                                "white",
-                                "master",
-                                "favicons",
-                                "motion",
-                                "formats",
-                                "structure",
-                              ])
-                            }
-                          >
-                            {" "}
-                            <CheckIcon className="w-4 mt-0.5 h-4" />
-                            Check All
-                          </a>
-                          <a
-                            className="flex ml-1 -mt-3 text-sm font-semibold leading-6 text-white transition-all duration-500 transform gap-x-0.5 hover:gap-x-1 hover:scale-105 hover:text-primary-500 cursor-pointer"
-                            onClick={() =>
-                              setSelectedExtensions(["svg", "color"])
-                            }
-                          >
-                            <XMarkIcon className="w-4 mt-1 h-4" />
-                            Uncheck All
-                          </a>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}{" "}
-                </AnimatePresence>
+                            <div className="col-span-2 flex gap-x-12">
+                              <a
+                                className="flex -mt-3 text-sm font-semibold leading-6 text-white transition-all duration-500 transform gap-x-0.5 hover:gap-x-1 hover:scale-105 hover:text-primary-500 cursor-pointer"
+                                onClick={handleCheckAll}
+                              >
+                                {" "}
+                                <CheckIcon className="w-4 mt-0.5 h-4" />
+                                Check All
+                              </a>
+                              <a
+                                className="flex ml-1 -mt-3 text-sm font-semibold leading-6 text-white transition-all duration-500 transform gap-x-0.5 hover:gap-x-1 hover:scale-105 hover:text-primary-500 cursor-pointer"
+                                onClick={handleUncheckAll}
+                              >
+                                <XMarkIcon className="w-4 mt-1 h-4" />
+                                Uncheck All
+                              </a>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}{" "}
+                    </AnimatePresence>
+                  </div>
+                </fieldset>
               </div>
-            </fieldset>
-          </div>
 
-          <div id="all-logos" className="w-full">
-            <motion.div
-              key={mode}
-              initial={isFirstRender ? false : { opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="w-full mt-1"
-            >
-              {mode === "individual" && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full px-2">
-                  {(
-                    ["vertical", "horizontal", "logomark", "wordmark"] as const
-                  ).map(renderFileInput)}
-                </div>
-              )}
-
-              {mode === "archive" && (
-                <div className="w-full px-2">{renderArchiveInput()}</div>
-              )}
-            </motion.div>
-          </div>
-
-          <div id="company-name" className="mt-6 mb-4">
-            <div
-              className={`${
-                showPackageNameInput ? "opacity-100" : "opacity-0"
-              } w-full max-w-2xs transition-opacity duration-300 ease-in-out`}
-              style={{ height: showPackageNameInput ? "auto" : "0px" }}
-            >
-              {showPackageNameInput && (
+              <div id="all-logos" className="w-full">
                 <motion.div
+                  key={mode}
                   initial={isFirstRender ? false : { opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
+                  className="w-full mt-2 mb-2"
                 >
-                  <div className="flex flex-row border border-primary-500/20 rounded-tr-xl rounded-bl-xl sm:flex-row whitespace-nowrap justify-center gap-y-4 -mr-0  gap-x-2">
-                    <div className="flex-grow">
-                      <input
-                        type="text"
-                        id="package-name"
-                        ref={packageNameInputRef}
-                        value={packageName}
-                        onChange={handlePackageNameChange}
-                        className="w-full px-3 py-2 bg-secondary-400 rounded-bl-xl border-r border-primary-500/20  text-white focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-transparent"
-                        placeholder="Package Name"
-                      />
+                  {mode === "individual" && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full px-2">
+                      {(
+                        [
+                          "vertical",
+                          "horizontal",
+                          "logomark",
+                          "wordmark",
+                        ] as const
+                      ).map(renderFileInput)}
                     </div>
-                    <div className="flex-shrink-0 w-full sm:w-auto">
-                      <CustomColorPicker
-                        color={selectedColor}
-                        onChange={setSelectedColor}
-                      />
-                    </div>
-                    <div className="flex-shrink-0">
-                      <button
-                        type="submit"
-                        id="generate-button"
-                        className={`w-full sm:w-auto cursor-pointer rounded-tr-xl bg-primary-500 px-2.5 py-2.5 text-sm font-bold text-secondary-400 shadow-sm hover:bg-primary-500/5 hover:border-primary-500/60 hover:text-primary-500 border-primary-500/20 border focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 duration-500 hover:scale-102 ${
-                          !showPackageNameInput ||
-                          Object.values(files).every((file) => file === null)
-                            ? "opacity-50 cursor-not-allowed"
-                            : ""
-                        }`}
-                        disabled={
-                          !showPackageNameInput ||
-                          Object.values(files).every((file) => file === null)
-                        }
-                      >
-                        Generate
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </div>{" "}
-          </div>
-
-          {!sampleLoaded && !showPackageNameInput && (
-            <motion.div
-              initial={isFirstRender ? false : { opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <a
-                onClick={handleTrySample}
-                id="try-a-sample"
-                className="py-2 flex mb-8 -mt-4 text-sm font-semibold leading-6 text-white transition-all duration-500 transform gap-x-0.5 hover:gap-x-1 hover:scale-105 hover:text-primary-500 cursor-pointer"
-              >
-                Try a Sample
-                <ChevronRightIcon className="w-4 mt-1 h-4" />
-              </a>
-            </motion.div>
-          )}
-
-          <div
-            className="relative w-full flex justify-center items-center"
-            style={{ minHeight: "40px" }}
-          >
-            <AnimatePresence>
-              {status && (
-                <motion.div
-                  key="status"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ duration: 0.5 }}
-                  className="absolute bg-secondary-400 text-white border border-primary-500/20 text-sm px-4 py-2 -mt-4 rounded-tr-xl rounded-bl-xl shadow-lg z-100 flex justify-center items-center gap-2"
-                  style={{
-                    minHeight: "40px",
-                    width: "fit-content",
-                    padding: "0 16px",
-                  }}
-                >
-                  {isGenerating && (
-                    <ArrowPathIcon className="h-5 w-5 animate-spin text-primary-500" />
                   )}
-                  <span>{status}</span>
+
+                  {mode === "archive" && (
+                    <div className="w-full px-2">{renderArchiveInput()}</div>
+                  )}
                 </motion.div>
-              )}
-            </AnimatePresence>
+              </div>
+
+              <div id="company-name" className="mt-6 mb-4">
+                {showPackageNameInput ? (
+                  <div className="w-full max-w-2xs transition-opacity duration-300 ease-in-out">
+                    <motion.div
+                      initial={isFirstRender ? false : { opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div className="flex flex-row border border-primary-500/20 rounded-tr-xl rounded-bl-xl sm:flex-row whitespace-nowrap justify-center gap-y-4 -mr-0  gap-x-2">
+                        <div className="flex-grow">
+                          <input
+                            type="text"
+                            id="package-name"
+                            ref={packageNameInputRef}
+                            value={packageName}
+                            onChange={handlePackageNameChange}
+                            className="w-full px-3 py-2 bg-secondary-400 rounded-bl-xl border-r border-primary-500/20  text-white focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-transparent"
+                            placeholder="Package Name"
+                          />
+                        </div>
+                        <div className="flex-shrink-0 w-full sm:w-auto">
+                          <CustomColorPicker
+                            color={selectedColor}
+                            onChange={setSelectedColor}
+                          />
+                        </div>
+                        <div className="flex-shrink-0">
+                          <button
+                            type="submit"
+                            id="generate-button"
+                            className={`w-full sm:w-auto cursor-pointer rounded-tr-xl bg-primary-500 px-2.5 py-2.5 text-sm font-bold text-secondary-400 shadow-sm hover:bg-primary-500/5 hover:border-primary-500/60 hover:text-primary-500 border-primary-500/20 border focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 duration-500 hover:scale-102 ${
+                              !showPackageNameInput
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
+                            }`}
+                            disabled={!showPackageNameInput}
+                            onClick={(e) => {
+                              if (!showPackageNameInput) {
+                                e.preventDefault();
+                                setStatus(
+                                  mode === "archive"
+                                    ? "Please upload a valid archive with at least one required file"
+                                    : "Please upload at least one logo before generating"
+                                );
+                              }
+                            }}
+                          >
+                            Generate
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </div>
+                ) : (
+                  <motion.div
+                    initial={isFirstRender ? false : { opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <a
+                      onClick={handleTrySample}
+                      id="try-a-sample"
+                      className="py-2 flex mb-8 -mt-2 text-sm font-semibold leading-6 text-white transition-all duration-500 transform gap-x-0.5 hover:gap-x-1 hover:scale-105 hover:text-primary-500 cursor-pointer"
+                    >
+                      Try a Sample
+                      <ChevronRightIcon className="w-4 mt-1 h-4" />
+                    </a>
+                  </motion.div>
+                )}
+              </div>
+            </form>
           </div>
-        </form>
-      </div>
-    </section>
+        </motion.section>
+      </AnimatePresence>
+    </>
   );
 }
