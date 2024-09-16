@@ -57,7 +57,7 @@ const startIntroJs = (showUploadForm: boolean) => {
       intro: "You can always go back to the landing page.",
     },
     {
-      element: "#vertical-logo-drop-zone",
+      element: "#all-logos",
       intro: "Drag and drop, upload or paste one or more logos.",
     },
     {
@@ -130,7 +130,15 @@ const startIntroJs = (showUploadForm: boolean) => {
   });
 
   intro.onchange((targetElement) => {
-    if (intro._currentStep === 3) {
+    if (intro._currentStep === 0) {
+      const individualTab = document.querySelector(
+        "#individual-tab"
+      ) as HTMLElement;
+      if (individualTab && !(individualTab as HTMLInputElement).checked) {
+        (individualTab as HTMLInputElement).click();
+        (individualTab as HTMLInputElement).blur();
+      }
+    } else if (intro._currentStep === 3) {
       const refreshIcon = document.querySelector(
         "#refresh-icon"
       ) as HTMLElement;

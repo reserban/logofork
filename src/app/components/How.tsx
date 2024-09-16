@@ -84,7 +84,7 @@ export default function How() {
           <div className="grid max-w-2xl sm:max-w-4xl grid-cols-1 mx-auto gap-x-48 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-8">
             <div className="lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:mx-auto lg:grid lg:w-full lg:max-w-7xl lg:grid-cols-2 lg:gap-x-8 lg:px-8">
               <div className="lg:pr-4">
-                <div className="w-full flex justify-center mb-8 -mt-4 sm:hidden">
+                <div className="w-full flex justify-left mb-8 -mt-4 sm:hidden">
                   <Card
                     image="/photos/horizontal_selected.svg"
                     opacity={1}
@@ -123,12 +123,12 @@ export default function How() {
                         designed to support you across different platforms.
                       </span>
                     </li>
-                    <li className="flex gap-x-3" id="how1">
+                    <li className="flex gap-x-3">
                       <DocumentArrowUpIcon
                         className="flex-none w-5 h-5 mt-1 text-primary-500"
                         aria-hidden="true"
                       />
-                      <span>
+                      <span id="how1">
                         Why fewer options than other similar softwares? I
                         believe more options can confuse users. That&apos;s why
                         we keep Logofork simple and consistent for everyone.
@@ -141,10 +141,7 @@ export default function How() {
                       Alexandru Serban - Founder @ Unzet
                     </p>
                   </i>
-                  <h2
-                    className="mt-10 text-2xl font-bold tracking-tight text-primary-500"
-                    id="how2"
-                  >
+                  <h2 className="mt-10 text-2xl font-bold tracking-tight text-primary-500">
                     Your support is important
                   </h2>
                   <p className="mt-6 text-xl leading-7 text-white">
@@ -152,7 +149,7 @@ export default function How() {
                     We&apos;re here to improve it and make it the best it can
                     be.
                   </p>
-                  <p className="mt-6 text-xl leading-7 text-white">
+                  <p className="mt-6 text-xl leading-7 text-white" id="how2">
                     This is where you come in. Support Logofork by giving
                     feedback, donating to keep it running, or simply spreading
                     the word. Your support motivates us to keep going.
