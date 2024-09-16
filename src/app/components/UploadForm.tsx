@@ -948,7 +948,7 @@ export default function UploadForm() {
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: isFirstRender ? 0 : 0.3 }}
             className={`hidden md:flex text-white text-sm px-4 py-2 rounded-ct shadow-lg justify-center items-center gap-2 ${
-              status
+              status || isGenerating || isDownloading
                 ? "bg-secondary-400 border border-primary-500/20"
                 : "bg-transparent"
             }`}
@@ -962,7 +962,11 @@ export default function UploadForm() {
               (isDownloading && status !== "Logo package downloaded!")) && (
               <ArrowPathIcon className="h-5 w-5 animate-spin text-primary-500" />
             )}
-            <span className={status ? "" : "text-white/60"}>
+            <span
+              className={
+                status || isGenerating || isDownloading ? "" : "text-white/60"
+              }
+            >
               {status ||
                 (isDownloading ? "Downloading logo package..." : idleStatus)}
             </span>
