@@ -1404,6 +1404,7 @@ export default function UploadForm() {
                         </div>
                         <div className="flex-shrink-0">
                           <button
+                            data-umami-event="generate package"
                             type="submit"
                             id="generate-button"
                             className={`w-full sm:w-auto cursor-pointer rounded-tr-xl bg-primary-500 px-2.5 py-2.5 text-sm font-bold text-secondary-400 shadow-sm hover:bg-primary-500/5 hover:border-primary-500/60 hover:text-primary-500 border-primary-500/20 border focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 duration-500 hover:scale-102 ${
@@ -1436,6 +1437,7 @@ export default function UploadForm() {
                     transition={{ duration: 0.3 }}
                   >
                     <a
+                      data-umami-event="try sample"
                       onClick={handleTrySample}
                       id="try-a-sample"
                       className="py-2 flex mb-8 -mt-2 text-sm font-semibold leading-6 text-white transition-all duration-500 transform gap-x-0.5 hover:gap-x-1 hover:scale-105 hover:text-primary-500 cursor-pointer"

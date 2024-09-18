@@ -58,6 +58,7 @@ export default function Footer() {
                 <h2 className="text-3xl font-bold tracking-tight text-white sm:text-3xl ">
                   Please Give us Feedback to Improve on{" "}
                   <a
+                    data-umami-event="join discord"
                     href="https://discord.gg/W3ukzkXe2y"
                     target="_blank"
                     rel="noopener noreferrer"

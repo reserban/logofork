@@ -157,6 +157,7 @@ export default function How() {
                 </div>
                 <div className="flex items-center mt-10 gap-x-6">
                   <Link
+                    data-umami-event="join discord"
                     href="https://discord.gg/W3ukzkXe2y"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -165,6 +166,7 @@ export default function How() {
                     Join Discord
                   </Link>
                   <Link
+                    data-umami-event="support us"
                     href="https://buymeacoffee.com/theserban"
                     target="_blank"
                     rel="noopener noreferrer"

@@ -273,6 +273,7 @@ export default function Navbar({
 
   const UnzetButton = () => (
     <button
+      data-umami-event="unzet click"
       onClick={() => window.open("https://unzet.com", "_blank")}
       className="rounded-tr-xl rounded-bl-xl border-1 border border-white/80 text-white px-4 py-2.5 text-sm font-semibold shadow-sm hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500 transform transition-transform duration-500 hover:scale-105 flex items-center"
     >

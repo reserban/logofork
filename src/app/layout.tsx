@@ -28,6 +28,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="bg-black">
+      <head>
+        <script
+          defer
+          src="https://stats.unzet.com/script.js"
+          data-website-id="91ddefe0-4137-4f82-94ac-2cde39d19f3d"
+        ></script>
+      </head>
       <body className={dmSans.className}>{children}</body>
     </html>
   );
