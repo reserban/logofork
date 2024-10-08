@@ -9,11 +9,12 @@ import {
 import Link from "next/link";
 
 export default function How() {
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [isMobileVideoPlaying, setIsMobileVideoPlaying] = useState(false);
+  const [isDesktopVideoPlaying, setIsDesktopVideoPlaying] = useState(false);
 
   const MobileVideoContainer = () => (
     <div className="relative w-full aspect-video rounded-cts border border-primary-500/20 overflow-hidden">
-      {!isVideoPlaying ? (
+      {!isMobileVideoPlaying ? (
         <>
           <Image
             src="/photos/videothumbnail.webp"
@@ -23,7 +24,7 @@ export default function How() {
             className="rounded-cts opacity-80 object-cover"
           />
           <button
-            onClick={() => setIsVideoPlaying(true)}
+            onClick={() => setIsMobileVideoPlaying(true)}
             className="absolute inset-0 flex items-center justify-center group"
           >
             <svg
@@ -161,7 +162,7 @@ export default function How() {
 
             <div className="hidden lg:inline pt-5 mt-0 pl-12 md:pl-1 md:pt-12 lg:pl-5 pr-12 sm:-mt-12 lg:sticky lg:top-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 duration-500 hover:-translate-y-1 lg:overflow-hidden">
               <div className="mt-6 relative w-[560px] h-[315px]  rounded-cts border border-primary-500/20 overflow-hidden ">
-                {!isVideoPlaying ? (
+                {!isDesktopVideoPlaying ? (
                   <>
                     <Image
                       src="/photos/videothumbnail.webp"
@@ -171,7 +172,7 @@ export default function How() {
                       className="rounded-cts opacity-80 object-cover"
                     />
                     <button
-                      onClick={() => setIsVideoPlaying(true)}
+                      onClick={() => setIsDesktopVideoPlaying(true)}
                       className="absolute inset-0 flex items-center justify-center group"
                     >
                       <svg
