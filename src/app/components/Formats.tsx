@@ -43,12 +43,12 @@ export default function Formats() {
     if (!container) return;
 
     const totalWidth = container.scrollWidth / 2;
-    let currentPosition = -totalWidth;
+    let currentPosition = -totalWidth; // Start from the left
 
     const animate = () => {
-      currentPosition += 0.7;
+      currentPosition += 0.7; // Move to the right
       if (currentPosition >= 0) {
-        currentPosition = -totalWidth;
+        currentPosition -= totalWidth;
       }
       container.style.transform = `translateX(${currentPosition}px)`;
       requestAnimationFrame(animate);

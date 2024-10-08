@@ -1,105 +1,86 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import {
   DocumentArrowUpIcon,
   WalletIcon,
   ChevronRightIcon,
+  PlayIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
-interface CardProps {
-  image: string;
-  opacity: number;
-  className?: string;
-  imageWidth: number;
-  imageHeight: number;
-  priority?: boolean;
-}
-
-const Card: React.FC<CardProps> = ({
-  image,
-  opacity,
-  className,
-  imageWidth,
-  imageHeight,
-  priority = false,
-}) => (
-  <div
-    className={`mt-0 sm:mt-8 ring-1 ring-gray-400/10 sm:w-[33.8rem] sm:h-[16rem] w-[28rem] text-white p-6 rounded-tr-ctx rounded-bl-ctx border shadow-lg transition-transform duration-700 hover:-translate-y-1 ${className}`}
-  >
-    <div className="flex justify-center items-center w-full h-full">
-      <Image
-        src={image}
-        alt="Card Image"
-        width={imageWidth}
-        height={imageHeight}
-        priority={priority}
-        loading={priority ? "eager" : "lazy"}
-        style={{ opacity, transition: "opacity 0.7s, width 0.7s, height 0.7s" }}
-        className="rounded-tr-ct rounded-bl-ct"
-      />
-    </div>
-  </div>
-);
-
 export default function How() {
-  const [cardState, setCardState] = useState("default");
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const useClientElement = document.getElementById("how2");
-      const cardElement = document.getElementById("sticky-card");
-      const how1Element = document.getElementById("how1");
-      if (useClientElement && cardElement && how1Element) {
-        const useClientRect = useClientElement.getBoundingClientRect();
-        const cardRect = cardElement.getBoundingClientRect();
-        const how1Rect = how1Element.getBoundingClientRect();
-
-        if (
-          cardRect.top < useClientRect.bottom &&
-          cardRect.bottom > useClientRect.top
-        ) {
-          setCardState("how2");
-        } else if (
-          cardRect.top < how1Rect.bottom &&
-          cardRect.bottom > how1Rect.top
-        ) {
-          setCardState("how1");
-        } else {
-          setCardState("default");
-        }
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  const MobileVideoContainer = () => (
+    <div className="relative w-full aspect-video rounded-cts border border-primary-500/20 overflow-hidden">
+      {!isVideoPlaying ? (
+        <>
+          <Image
+            src="/photos/videothumbnail.webp"
+            alt="Video thumbnail"
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="rounded-cts opacity-80 object-cover"
+          />
+          <button
+            onClick={() => setIsVideoPlaying(true)}
+            className="absolute inset-0 flex items-center justify-center group"
+          >
+            <svg
+              width="64"
+              height="64"
+              viewBox="0 0 164 115"
+              className=" duration-500 group-hover:text-red-600 group-hover:scale-105 text-secondary-300 opacity-80"
+            >
+              <g transform="matrix(1,0,0,1,-519.516,146.481)">
+                <g transform="matrix(5.71504,0,0,5.71504,2858.62,1441.08)">
+                  <path
+                    d="M-381.316,-274.664C-381.645,-275.894 -382.612,-276.86 -383.842,-277.19C-386.069,-277.787 -395.004,-277.787 -395.004,-277.787C-395.004,-277.787 -403.939,-277.787 -406.166,-277.19C-407.396,-276.86 -408.362,-275.894 -408.692,-274.664C-409.289,-272.437 -409.289,-267.787 -409.289,-267.787C-409.289,-267.787 -409.289,-263.137 -408.692,-260.91C-408.362,-259.68 -407.396,-258.714 -406.166,-258.384C-403.939,-257.787 -395.004,-257.787 -395.004,-257.787C-395.004,-257.787 -386.069,-257.787 -383.842,-258.384C-382.612,-258.714 -381.645,-259.68 -381.316,-260.91C-380.719,-263.137 -380.719,-267.787 -380.719,-267.787C-380.719,-267.787 -380.721,-272.437 -381.316,-274.664Z"
+                    style={{
+                      fill: "currentColor",
+                      fillRule: "nonzero",
+                    }}
+                  />
+                  <path
+                    d="M-397.864,-263.502L-390.441,-267.787L-397.864,-272.072L-397.864,-263.502Z"
+                    style={{ fill: "white", fillRule: "nonzero" }}
+                  />
+                </g>
+              </g>
+            </svg>
+          </button>
+        </>
+      ) : (
+        <iframe
+          className="absolute top-0 left-0 w-full h-full rounded-cts opacity-80"
+          src="https://www.youtube.com/embed/-H7w9wNTcvo?autoplay=1"
+          title="YouTube video player"
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        ></iframe>
+      )}
+    </div>
+  );
 
   return (
     <>
       <section id="how">
-        <div className="relative px-6 pt-20 sm:pt-20 pb-6  sm:pb-20 overflow-hidden isolate sm:py-20 lg:overflow-visible lg:px-0">
+        <div className="relative px-6 pt-6 lg:pt-20 pb-6 sm:pb-20 overflow-hidden isolate sm:py-20 lg:overflow-visible lg:px-0">
           <div className="absolute inset-0 overflow-hidden -z-10"></div>
-          <div className="grid max-w-2xl sm:max-w-4xl grid-cols-1 mx-auto gap-x-48 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-8">
+
+          <div className="lg:hidden mb-12 max-w-2xl mx-auto">
+            <MobileVideoContainer />
+          </div>
+
+          <div className="grid max-w-2xl sm:max-w-4xl grid-cols-1 mx-auto gap-x-14 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-8">
             <div className="lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:mx-auto lg:grid lg:w-full lg:max-w-7xl lg:grid-cols-2 lg:gap-x-8 lg:px-8">
               <div className="lg:pr-4">
-                <div className="w-full flex justify-left mb-8 -mt-4 sm:hidden">
-                  <Card
-                    image="/photos/horizontal_selected.svg"
-                    opacity={1}
-                    className="border-2 border-primary-500 bg-primary-500/20"
-                    imageWidth={460}
-                    imageHeight={360}
-                    priority={true}
-                  />
-                </div>
-
-                <div className="max-w-2xl sm:max-w-5xl lg:max-w-xl mx-auto lg:mx-0">
+                <div className="max-w-2xl sm:max-w-5xl lg:max-w-xl mx-auto lg:mx-0 mr-1 sm:text-center lg:text-left">
                   <h2 className="text-3xl font-bold tracking-tight text-primary-500 sm:text-4xl">
                     Pack Pack Pack
                   </h2>
-                  <p className="mt-6 text-xl max-w-2xl leading-7 text-white">
+                  <p className="mt-6 text-xl max-w-2xl leading-7 text-white sm:mx-auto lg:mx-0">
                     This product was born from a problem I faced when switching
                     design software. Adobe had some community logo export
                     plugins, but when I moved to Affinity, I found no tools to
@@ -110,9 +91,9 @@ export default function How() {
             </div>
             <div className="lg:col-span-2 lg:col-start-1 lg:row-start-2 lg:mx-auto lg:grid lg:w-full lg:max-w-7xl lg:grid-cols-2 lg:gap-x-8 lg:px-8">
               <div className="lg:pr-4">
-                <div className="max-w-2xl text-lg leading-7 text-white lg:max-w-xl">
+                <div className="max-w-2xl text-lg leading-7 text-white lg:max-w-xl sm:mx-auto lg:mx-0 sm:text-center lg:text-left">
                   <ul role="list" className="space-y-8 text-white text-xl">
-                    <li className="flex gap-x-3">
+                    <li className="flex gap-x-3 sm:justify-center lg:justify-start">
                       <WalletIcon
                         className="flex-none w-5 h-5 mt-1 text-primary-500"
                         aria-hidden="true"
@@ -123,7 +104,7 @@ export default function How() {
                         designed to support you across different platforms.
                       </span>
                     </li>
-                    <li className="flex gap-x-3">
+                    <li className="flex gap-x-3 sm:justify-center lg:justify-start">
                       <DocumentArrowUpIcon
                         className="flex-none w-5 h-5 mt-1 text-primary-500"
                         aria-hidden="true"
@@ -136,7 +117,6 @@ export default function How() {
                     </li>
                   </ul>
                   <i>
-                    {" "}
                     <p className="mt-6 font-light text-xl opacity-60">
                       Alexandru Serban - Founder @ Unzet
                     </p>
@@ -155,7 +135,7 @@ export default function How() {
                     the word. Your support motivates us to keep going.
                   </p>
                 </div>
-                <div className="flex items-center mt-10 gap-x-6">
+                <div className="flex items-center mt-10 gap-x-6 sm:justify-center lg:justify-start">
                   <Link
                     data-umami-event="join discord"
                     href="https://discord.gg/W3ukzkXe2y"
@@ -179,38 +159,56 @@ export default function How() {
               </div>
             </div>
 
-            <div
-              id="sticky-card"
-              className="hidden sm:inline pt-5 mt-0 pl-12 sm:pl-5 pr-12 sm:-mt-12 -ml-12 sm:-ml-4 lg:-ml-12 lg:sticky lg:top-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:overflow-hidden transition-all duration-700"
-            >
-              {cardState === "default" && (
-                <Card
-                  image="/photos/horizontal.svg"
-                  opacity={0.5}
-                  className="border-2 border-dashed border-primary-500/40 bg-black/60"
-                  imageWidth={380}
-                  imageHeight={280}
-                  priority={true}
-                />
-              )}
-              {cardState === "how1" && (
-                <Card
-                  image="/photos/horizontal_hover.svg"
-                  opacity={1}
-                  className="border-2 border-primary-500/40 bg-primary-500/10"
-                  imageWidth={540}
-                  imageHeight={440}
-                />
-              )}
-              {cardState === "how2" && (
-                <Card
-                  image="/photos/horizontal_selected.svg"
-                  opacity={1}
-                  className="border-2 border-primary-500 bg-primary-500/20"
-                  imageWidth={460}
-                  imageHeight={360}
-                />
-              )}
+            <div className="hidden lg:inline pt-5 mt-0 pl-12 md:pl-1 md:pt-12 lg:pl-5 pr-12 sm:-mt-12 lg:sticky lg:top-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 duration-500 hover:-translate-y-1 lg:overflow-hidden">
+              <div className="mt-6 relative w-[560px] h-[315px]  rounded-cts border border-primary-500/20 overflow-hidden ">
+                {!isVideoPlaying ? (
+                  <>
+                    <Image
+                      src="/photos/videothumbnail.webp"
+                      alt="Video thumbnail"
+                      fill
+                      sizes="560px"
+                      className="rounded-cts opacity-80 object-cover"
+                    />
+                    <button
+                      onClick={() => setIsVideoPlaying(true)}
+                      className="absolute inset-0 flex items-center justify-center group"
+                    >
+                      <svg
+                        width="64"
+                        height="64"
+                        viewBox="0 0 164 115"
+                        className=" duration-500 group-hover:text-red-600 group-hover:scale-105 text-secondary-300 opacity-80"
+                      >
+                        <g transform="matrix(1,0,0,1,-519.516,146.481)">
+                          <g transform="matrix(5.71504,0,0,5.71504,2858.62,1441.08)">
+                            <path
+                              d="M-381.316,-274.664C-381.645,-275.894 -382.612,-276.86 -383.842,-277.19C-386.069,-277.787 -395.004,-277.787 -395.004,-277.787C-395.004,-277.787 -403.939,-277.787 -406.166,-277.19C-407.396,-276.86 -408.362,-275.894 -408.692,-274.664C-409.289,-272.437 -409.289,-267.787 -409.289,-267.787C-409.289,-267.787 -409.289,-263.137 -408.692,-260.91C-408.362,-259.68 -407.396,-258.714 -406.166,-258.384C-403.939,-257.787 -395.004,-257.787 -395.004,-257.787C-395.004,-257.787 -386.069,-257.787 -383.842,-258.384C-382.612,-258.714 -381.645,-259.68 -381.316,-260.91C-380.719,-263.137 -380.719,-267.787 -380.719,-267.787C-380.719,-267.787 -380.721,-272.437 -381.316,-274.664Z"
+                              style={{
+                                fill: "currentColor",
+                                fillRule: "nonzero",
+                              }}
+                            />
+                            <path
+                              d="M-397.864,-263.502L-390.441,-267.787L-397.864,-272.072L-397.864,-263.502Z"
+                              style={{ fill: "white", fillRule: "nonzero" }}
+                            />
+                          </g>
+                        </g>
+                      </svg>
+                    </button>
+                  </>
+                ) : (
+                  <iframe
+                    className="absolute top-0 left-0 w-full h-full rounded-cts opacity-80"
+                    src="https://www.youtube.com/embed/-H7w9wNTcvo?autoplay=1"
+                    title="YouTube video player"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                )}
+              </div>
             </div>
           </div>
         </div>

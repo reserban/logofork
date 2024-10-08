@@ -1,7 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  images: {
+    domains: ["img.youtube.com"],
+  },
   experimental: {
-    serverComponentsExternalPackages: ["sharp", "puppeteer"],
+    serverComponentsExternalPackages: ["sharp"],
   },
   productionBrowserSourceMaps: false,
 };
