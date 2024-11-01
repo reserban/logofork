@@ -16,6 +16,7 @@ import {
   ClipboardIcon,
   BookmarkIcon,
   SquaresPlusIcon,
+  ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/24/outline";
 
 import Link from "next/link";
@@ -275,21 +276,16 @@ export default function Navbar({
     <button
       data-umami-event="unzet click"
       onClick={() => window.open("https://unzet.com", "_blank")}
-      className="rounded-tr-xl rounded-bl-xl border-1 border border-white/80 text-white px-4 py-2.5 text-sm font-semibold shadow-sm hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500 transform transition-transform duration-500 hover:scale-105 flex items-center"
+      className="rounded-lg bg-secondary-400 text-white px-5 py-2 text-md font-base shadow-sm hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-500 transform transition-transform duration-500 hover:scale-105 flex items-center gap-2"
     >
-      <span className="pr-2">
-        <span className="relative flex w-2 h-2">
-          <span className="absolute inline-flex w-full h-full bg-white opacity-100 animate-ping"></span>
-          <span className="relative inline-flex w-2 h-2 pb-1 bg-white "></span>
-        </span>
-      </span>{" "}
       Unzet
+      <ArrowTopRightOnSquareIcon className="w-4 h-4 stroke-[2]" />
     </button>
   );
 
   return (
     <motion.header
-      className="rounded-br-ct z-50 relative mb-6 sm:bg-none"
+      className="rounded-br-ct z-50 relative mb-2 sm:bg-none"
       animate={{ backgroundColor: mobileMenuOpen ? "black" : "transparent" }}
       transition={{ duration: 0.2 }}
     >
@@ -302,7 +298,7 @@ export default function Navbar({
             <Image
               onClick={() => setShowUploadForm(false)}
               id="logo"
-              className="w-40 h-auto transition-transform duration-500 transform hover:scale-105 cursor-pointer"
+              className="w-44 h-auto transition-transform duration-500 transform hover:scale-105 cursor-pointer"
               src="/photos/logo.svg"
               alt="Unzet Logo"
               width={128}
@@ -312,8 +308,8 @@ export default function Navbar({
         </div>
         <div className="hidden lg:flex lg:flex-1 lg:justify-center lg:items-center transform z-50">
           {!showUploadForm && (
-            <span className="text-white/60 mt-1.5 text-sm">
-              Logofork Public Beta v2.0.1
+            <span className="text-secondary-400 mt-1.5 text-md">
+              Logofork Public Beta v3.1
             </span>
           )}
         </div>
@@ -328,7 +324,7 @@ export default function Navbar({
               >
                 <ChatBubbleBottomCenterTextIcon
                   id="tutorial-start"
-                  className="mr-0.5 w-5 h-5 mt-0.5 text-white cursor-pointer hover:text-primary-500 hover:scale-105 duration-500"
+                  className="mr-0.5 w-6 stroke-[2] h-6 mt-0.5 cursor-pointer text-secondary-400 hover:text-primary-500 duration-500"
                   onClick={() => startIntroJs(showUploadForm)}
                 />
               </motion.div>

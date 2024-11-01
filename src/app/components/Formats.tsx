@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
 
 type Item = {
@@ -43,10 +42,10 @@ export default function Formats() {
     if (!container) return;
 
     const totalWidth = container.scrollWidth / 2;
-    let currentPosition = -totalWidth; // Start from the left
+    let currentPosition = -totalWidth;
 
     const animate = () => {
-      currentPosition += 0.7; // Move to the right
+      currentPosition += 0.7;
       if (currentPosition >= 0) {
         currentPosition -= totalWidth;
       }
@@ -62,16 +61,13 @@ export default function Formats() {
     return duplicatedItems.map((item, index) => (
       <div
         key={index}
-        className="hover:-translate-y-1 duration-500 flex-shrink-0 text-center transition-transform transform border px-10 py-5 tool-item rounded-tr-ct rounded-bl-ct bg-secondary-400/60 border-secondary-300/30"
+        className="flex-shrink-0 text-center transition-transform transform px-6 py-3 tool-item rounded-xl bg-secondary-400  border"
       >
         <div className="h-6 flex items-center justify-center mb-1 mt-1">
           <label className="flex items-center">
-            <span
-              className="w-5 h-5 inline-block mr-2 rounded border bg-primary-500 opacity-80 border-primary-500"
-              style={{ borderWidth: "1px" }}
-            >
+            <span className="w-5 h-5 inline-block mr-2 rounded  bg-primary-500">
               <svg
-                className="w-4 h-4 text-secondary-400"
+                className="w-4 h-4 text-secondary-400 pt-0.5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -87,7 +83,7 @@ export default function Formats() {
               </svg>
             </span>
           </label>
-          <span className="text-2xl ml-0.5 font-semibold text-white/80">
+          <span className="text-xl ml-0.5 font-medium text-white">
             {item.bigText}
           </span>
         </div>
@@ -99,33 +95,19 @@ export default function Formats() {
     <section id="formats" className="relative">
       <div className="mx-auto overflow-hidden py-24 pb-0 sm:pt-12 pt-16">
         <div className="relative mx-auto max-w-7xl px-7 lg:px-8 pb-12 flex">
-          <div className="w-2/3 h-24 hover:-translate-x-1 duration-500 bg-primary-500/10 border border-primary-500/20 hidden lg:flex rounded-bl-ct items-center justify-center">
-            <Image
-              className="opacity-90"
-              src="photos/svg.svg"
-              alt="SVG Logo"
-              width={44}
-              height={44}
-            />
-          </div>
-          <div className="overflow-hidden border-r border-l border-primary-500/10 sm:border-none -ml-1 lg:ml-0">
+          <div className="absolute left-7 lg:left-8 top-0 bottom-10 w-16 bg-gradient-to-r from-background to-transparent z-10 border-l border-secondary-400/20"></div>
+
+          <div className="overflow-hidden border-l border-r border-primary-500/10 sm:border-none -ml-1 lg:ml-0">
             <div
               ref={containerRef}
-              className="flex space-x-6 py-1 no-scrollbar mt-2"
+              className="flex space-x-6 py-1 no-scrollbar mt-2 opacity-90"
               style={{ width: "fit-content" }}
             >
               {renderItems()}
             </div>
           </div>
-          <div className="w-2/3 h-24 hover:translate-x-1 duration-500 bg-primary-500/10 border border-primary-500/20 hidden lg:flex rounded-tr-ct items-center justify-center">
-            <Image
-              className="opacity-90"
-              src="photos/zip_h.svg"
-              alt="Zip Package"
-              width={40}
-              height={40}
-            />
-          </div>
+
+          <div className="absolute right-7 lg:right-8 top-0 bottom-10 w-16 bg-gradient-to-l from-background to-transparent z-10 border-r border-secondary-400/20"></div>
         </div>
       </div>
     </section>

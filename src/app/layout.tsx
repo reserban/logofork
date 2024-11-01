@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { DM_Sans } from "next/font/google";
+import { Lexend } from "next/font/google";
 import "./globals.css";
 
-const dmSans = DM_Sans({ subsets: ["latin"] });
+const lexend = Lexend({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://logofork.com"),
@@ -35,7 +35,7 @@ export default function RootLayout({
           data-website-id="91ddefe0-4137-4f82-94ac-2cde39d19f3d"
         ></script>
       </head>
-      <body className={dmSans.className}>{children}</body>
+      <body className={lexend.className}>{children}</body>
     </html>
   );
 }
