@@ -26,7 +26,6 @@ export default function How() {
           <button
             onClick={() => setIsMobileVideoPlaying(true)}
             className="absolute inset-0 flex items-center justify-center group"
-            data-umami-event="video click"
           >
             <svg
               width="64"
@@ -175,7 +174,6 @@ export default function How() {
                     <button
                       onClick={() => setIsDesktopVideoPlaying(true)}
                       className="absolute inset-0 flex items-center justify-center group"
-                      data-umami-event="video click"
                     >
                       <svg
                         width="64"
