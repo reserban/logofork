@@ -148,7 +148,7 @@ export default function UploadForm() {
   const [packageName, setPackageName] = useState<string>("");
   const [status, setStatus] = useState<string>("");
   const [idleStatus, setIdleStatus] = useState<string>(
-    "Logofork Public Beta v2.0.1"
+    "Logofork Public Beta v2.0.4"
   );
   const [dragging, setDragging] = useState<string | null>(null);
   const [disabledFields, setDisabledFields] = useState<string[]>([]);

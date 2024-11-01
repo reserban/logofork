@@ -313,7 +313,7 @@ export default function Navbar({
         <div className="hidden lg:flex lg:flex-1 lg:justify-center lg:items-center transform z-50">
           {!showUploadForm && (
             <span className="text-white/60 mt-1.5 text-sm">
-              Logofork Public Beta v2.0.1
+              Logofork Public Beta v2.0.4
             </span>
           )}
         </div>
