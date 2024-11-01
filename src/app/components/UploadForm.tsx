@@ -83,7 +83,7 @@ const CustomColorPicker = ({
         id="color-picker"
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between w-full px-3 py-2 text-md font-medium text-white bg-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-500/40"
+        className="flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-white bg-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-500/40"
       >
         <span className="flex items-center">
           <span
@@ -148,7 +148,7 @@ export default function UploadForm() {
   const [packageName, setPackageName] = useState<string>("");
   const [status, setStatus] = useState<string>("");
   const [idleStatus, setIdleStatus] = useState<string>(
-    "Logofork Public Beta v3.1"
+    "Logofork Public Beta v2.0.1"
   );
   const [dragging, setDragging] = useState<string | null>(null);
   const [disabledFields, setDisabledFields] = useState<string[]>([]);
@@ -947,10 +947,10 @@ export default function UploadForm() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: isFirstRender ? 0 : 0.3 }}
-            className={`hidden md:flex text-white text-md px-4 py-2 rounded-ct justify-center items-center gap-2 ${
+            className={`hidden md:flex text-white text-sm px-4 py-2 rounded-ct shadow-lg justify-center items-center gap-2 ${
               status || isGenerating || isDownloading
                 ? "bg-secondary-400 border border-primary-500/20"
-                : "bg-transparent "
+                : "bg-transparent"
             }`}
             style={{
               minHeight: "40px",
@@ -960,13 +960,11 @@ export default function UploadForm() {
           >
             {(isGenerating ||
               (isDownloading && status !== "Logo package downloaded!")) && (
-              <ArrowPathIcon className="h-5 w-5 animate-spin text-primary-500 text-md" />
+              <ArrowPathIcon className="h-5 w-5 animate-spin text-primary-500" />
             )}
             <span
               className={
-                status || isGenerating || isDownloading
-                  ? "text-md"
-                  : "text-secondary-400 text-md"
+                status || isGenerating || isDownloading ? "" : "text-white/60"
               }
             >
               {status ||
@@ -975,7 +973,7 @@ export default function UploadForm() {
           </motion.div>
         </AnimatePresence>
       </div>
-      <div className="absolute inset-0 -z-10 h-full w-full bg-[linear-gradient(to_right,#8883_1px,transparent_1px),linear-gradient(to_bottom,#8883_1px,transparent_1px)] bg-[size:40px_40px] before:absolute before:inset-0 before:bg-gradient-to-t before:from-secondary-500/90 before:via-secondary-500/30 before:to-secondary-500/90 before:z-10" />
+
       <AnimatePresence>
         <motion.section
           initial={{ opacity: 0, y: 20 }}
@@ -998,7 +996,7 @@ export default function UploadForm() {
               <PasteModal />
               <h1
                 id="app-title"
-                className="text-4xl max-w-md text-center mb-6 mt-4 align center font-bold tracking-tight text-secondary-400 sm:text-5xl"
+                className="text-4xl max-w-md text-center mb-6 mt-4 align center font-bold tracking-tight text-white sm:text-6xl"
               >
                 <span>
                   Pack Your Logos{" "}
@@ -1013,7 +1011,7 @@ export default function UploadForm() {
                   <RadioGroup
                     value={mode}
                     onChange={setMode}
-                    className="bg-secondary-400 ml-7 grid grid-cols-2 gap-x-1 rounded-xl p-1.5 text-center text-sm font-semibold mb-2 leading-5 ring-1 ring-inset ring-primary-500/30"
+                    className="bg-secondary-400 ml-7 grid grid-cols-2 gap-x-1 rounded-tr-xl rounded-bl-xl p-1.5 text-center text-sm font-semibold mb-2 leading-5 ring-1 ring-inset ring-primary-500/30"
                   >
                     {MODES.map((option) => (
                       <Radio
@@ -1028,8 +1026,8 @@ export default function UploadForm() {
                         }
                         className={({ checked }) =>
                           checked
-                            ? "bg-primary-500 text-secondary-400 cursor-pointer rounded-md px-2.5 py-1"
-                            : "text-white cursor-pointer rounded-sm px-2.5 py-1 "
+                            ? "bg-primary-500 text-secondary-400 cursor-pointer rounded-tr-lg rounded-bl-lg px-2.5 py-1"
+                            : "text-white cursor-pointer rounded-sm px-2.5 py-1 hover:text-primary-500 hover:scale-95 duration-200"
                         }
                       >
                         {option.label}
@@ -1038,13 +1036,13 @@ export default function UploadForm() {
                   </RadioGroup>
                   <ArrowPathIcon
                     id="refresh-icon"
-                    className="ml-4 w-5 h-5 -mt-2 text-secondary-400 stroke-[2] cursor-pointer hover:text-primary-500 duration-500 transition-all"
+                    className="ml-4 w-5 h-5 -mt-2 text-white cursor-pointer hover:text-primary-500 hover:scale-105 duration-500"
                     onClick={handleRefresh}
                   />
                   <div className="relative">
                     <FunnelIcon
                       id="filter-icon"
-                      className="ml-3 w-5 h-5 -mt-2 text-secondary-400 stroke-[2] cursor-pointer hover:text-primary-500 duration-500 transition-all"
+                      className="ml-3 w-5 h-5 -mt-2 text-white cursor-pointer hover:text-primary-500 hover:scale-105 duration-500"
                       onClick={handleFilterIconClick}
                     />
 
@@ -1052,7 +1050,7 @@ export default function UploadForm() {
                       {showExtensionFilter && (
                         <motion.div
                           id="extension-filter"
-                          className="absolute right-0 mt-5 w-72  bg-secondary-400 py-4 pl-4 px-4 rounded-2xl z-10"
+                          className="absolute right-0 mt-5 w-72  bg-secondary-400 py-4 pl-4 px-4 rounded-tl-3xl rounded-br-3xl border-primary-500/20 shadow-lg z-10 border"
                           onClick={(e) => e.stopPropagation()}
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -1442,7 +1440,7 @@ export default function UploadForm() {
                       data-umami-event="try sample"
                       onClick={handleTrySample}
                       id="try-a-sample"
-                      className="py-2 flex mb-8 -mt-2 text-sm font-semibold leading-6 text-secondary-400 transition-all duration-500 transform gap-x-0.5 hover:gap-x-1 hover:scale-105 hover:text-primary-500 cursor-pointer"
+                      className="py-2 flex mb-8 -mt-2 text-sm font-semibold leading-6 text-white transition-all duration-500 transform gap-x-0.5 hover:gap-x-1 hover:scale-105 hover:text-primary-500 cursor-pointer"
                     >
                       Try a Sample
                       <ChevronRightIcon className="w-4 mt-1 h-4" />
